@@ -1,5 +1,6 @@
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Configuration;
+using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => options.EnableAnnotations());
 
+// Internationalisation (i18n)
+builder.Services.AddSharedLocalization();
+
 // Dependency Injection
 
 // Shared Bounded Context
@@ -62,7 +66,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Global exception handler — must be first in the pipeline
+app.UseGlobalExceptionHandler();
+
 app.UseHttpsRedirection();
+
+// Apply request localisation (reads Accept-Language / ?culture query string)
+app.UseSharedLocalization();
 
 app.UseAuthorization();
 

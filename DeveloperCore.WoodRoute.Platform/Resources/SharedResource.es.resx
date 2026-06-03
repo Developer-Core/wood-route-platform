@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+              xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true" />
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Mensajes genéricos -->
+  <data name="Error.NullValue" xml:space="preserve">
+    <value>El valor especificado no puede ser nulo.</value>
+  </data>
+  <data name="Error.NotFound" xml:space="preserve">
+    <value>El recurso solicitado no fue encontrado.</value>
+  </data>
+  <data name="Error.Unauthorized" xml:space="preserve">
+    <value>No tienes autorización para realizar esta acción.</value>
+  </data>
+  <data name="Error.Forbidden" xml:space="preserve">
+    <value>El acceso a este recurso está prohibido.</value>
+  </data>
+  <data name="Error.Conflict" xml:space="preserve">
+    <value>Ocurrió un conflicto con el estado actual del recurso.</value>
+  </data>
+  <data name="Error.BadRequest" xml:space="preserve">
+    <value>La solicitud contiene datos inválidos.</value>
+  </data>
+  <data name="Error.InternalServer" xml:space="preserve">
+    <value>Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.</value>
+  </data>
+  <data name="Error.ValidationFailed" xml:space="preserve">
+    <value>Se produjeron uno o más errores de validación.</value>
+  </data>
+
+  <!-- Auditoría -->
+  <data name="Audit.CreatedAt" xml:space="preserve">
+    <value>Creado el</value>
+  </data>
+  <data name="Audit.UpdatedAt" xml:space="preserve">
+    <value>Actualizado el</value>
+  </data>
+
+  <!-- Configuración -->
+  <data name="Config.MissingConnectionString" xml:space="preserve">
+    <value>La cadena de conexión 'DefaultConnection' no fue encontrada en la configuración.</value>
+  </data>
+</root>

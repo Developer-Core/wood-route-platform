@@ -1,24 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <InvariantGlobalization>true</InvariantGlobalization>
+        <InvariantGlobalization>false</InvariantGlobalization>
     </PropertyGroup>
 
     <ItemGroup>
         <!-- EntityFrameworkCore Database Persistence related packages -->
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.8"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.5"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5"/>
         <!-- PostgreSQL Database Persistence related packages -->
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4"/>
         <!-- Naming convention conversion related packages -->
         <PackageReference Include="Humanizer" Version="3.0.10"/>
         <!-- OpenAPI documentation related packages -->
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.1"/>
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.1"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.3.1"/>
     </ItemGroup>
 
 </Project>
