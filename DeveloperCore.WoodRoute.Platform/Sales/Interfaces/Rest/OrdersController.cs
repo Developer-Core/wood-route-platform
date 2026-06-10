@@ -1,0 +1,133 @@
+using System.Net.Mime;
+using DeveloperCore.WoodRoute.Platform.Sales.Application.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Sales.Application.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Commands;
+using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Errors;
+using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Queries;
+using DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest.Resources;
+using DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest.Transform;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
+
+namespace DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest;
+
+/// <summary>
+///     REST controller for custom furniture order management.
+/// </summary>
+[ApiController]
+[Route("api/v1/[controller]")]
+[Produces(MediaTypeNames.Application.Json)]
+[SwaggerTag("Available Order Endpoints.")]
+public class OrdersController(
+    IOrderCommandService orderCommandService,
+    IOrderQueryService orderQueryService)
+    : ControllerBase
+{
+    [HttpPost]
+    [SwaggerOperation("Create Order", "Create a new custom furniture order.", OperationId = "CreateOrder")]
+    [SwaggerResponse(201, "The order was created.", typeof(OrderResource))]
+    [SwaggerResponse(400, "The order was not created.")]
+    public async Task<IActionResult> CreateOrder(CreateOrderResource resource, CancellationToken cancellationToken)
+    {
+        var createOrderCommand = CreateOrderCommandFromResourceAssembler.ToCommandFromResource(resource);
+        var result = await orderCommandService.Handle(createOrderCommand, cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+            createdOrder => CreatedAtAction(nameof(GetOrderById), new { orderId = createdOrder.Id },
+                OrderResourceFromEntityAssembler.ToResourceFromEntity(createdOrder)));
+    }
+
+    [HttpGet]
+    [SwaggerOperation("Get All Orders", "Get all orders, optionally filtered by customer or carpenter.",
+        OperationId = "GetAllOrders")]
+    [SwaggerResponse(200, "The orders were found and returned.", typeof(IEnumerable<OrderResource>))]
+    [SwaggerResponse(400, "Both customer and carpenter filters were provided.")]
+    public async Task<IActionResult> GetAllOrders([FromQuery] int? customerId, [FromQuery] int? carpenterId,
+        CancellationToken cancellationToken)
+    {
+        if (customerId.HasValue && carpenterId.HasValue)
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Sales.InvalidOrderFilter",
+                detail: "Filter orders by either customerId or carpenterId, not both.",
+                instance: HttpContext.Request.Path);
+
+        var orders = customerId.HasValue
+            ? await orderQueryService.Handle(new GetOrdersByCustomerIdQuery(customerId.Value), cancellationToken)
+            : carpenterId.HasValue
+                ? await orderQueryService.Handle(new GetOrdersByCarpenterIdQuery(carpenterId.Value),
+                    cancellationToken)
+                : await orderQueryService.Handle(new GetAllOrdersQuery(), cancellationToken);
+
+        var orderResources = orders.Select(OrderResourceFromEntityAssembler.ToResourceFromEntity);
+        return Ok(orderResources);
+    }
+
+    [HttpGet("{orderId:int}")]
+    [SwaggerOperation("Get Order by Id", "Get an order by its unique identifier.", OperationId = "GetOrderById")]
+    [SwaggerResponse(200, "The order was found and returned.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    public async Task<IActionResult> GetOrderById(int orderId, CancellationToken cancellationToken)
+    {
+        var getOrderByIdQuery = new GetOrderByIdQuery(orderId);
+        var order = await orderQueryService.Handle(getOrderByIdQuery, cancellationToken);
+
+        if (order is null) return SalesActionResultAssembler.ToProblemFromError(this, SalesErrors.OrderNotFound);
+        return Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(order));
+    }
+
+    [HttpPatch("{orderId:int}")]
+    [SwaggerOperation("Modify Order", "Modify the furniture details of a pending order.",
+        OperationId = "ModifyOrder")]
+    [SwaggerResponse(200, "The order was modified.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not pending.")]
+    public async Task<IActionResult> ModifyOrder(int orderId, UpdateOrderResource resource,
+        CancellationToken cancellationToken)
+    {
+        var modifyOrderCommand = ModifyOrderCommandFromResourceAssembler.ToCommandFromResource(orderId, resource);
+        var result = await orderCommandService.Handle(modifyOrderCommand, cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+            modifiedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(modifiedOrder)));
+    }
+
+    [HttpPatch("{orderId:int}/accept")]
+    [SwaggerOperation("Accept Order", "Accept a pending order.", OperationId = "AcceptOrder")]
+    [SwaggerResponse(200, "The order was accepted.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not pending.")]
+    public async Task<IActionResult> AcceptOrder(int orderId, CancellationToken cancellationToken)
+    {
+        var result = await orderCommandService.Handle(new AcceptOrderCommand(orderId), cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+            acceptedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(acceptedOrder)));
+    }
+
+    [HttpPatch("{orderId:int}/reject")]
+    [SwaggerOperation("Reject Order", "Reject a pending order.", OperationId = "RejectOrder")]
+    [SwaggerResponse(200, "The order was rejected.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not pending.")]
+    public async Task<IActionResult> RejectOrder(int orderId, CancellationToken cancellationToken)
+    {
+        var result = await orderCommandService.Handle(new RejectOrderCommand(orderId), cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+            rejectedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(rejectedOrder)));
+    }
+
+    [HttpPatch("{orderId:int}/cancel")]
+    [SwaggerOperation("Cancel Order", "Cancel a pending order.", OperationId = "CancelOrder")]
+    [SwaggerResponse(200, "The order was cancelled.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not pending.")]
+    public async Task<IActionResult> CancelOrder(int orderId, CancellationToken cancellationToken)
+    {
+        var result = await orderCommandService.Handle(new CancelOrderCommand(orderId), cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+            cancelledOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(cancelledOrder)));
+    }
+}
