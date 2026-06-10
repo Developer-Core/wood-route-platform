@@ -29,7 +29,7 @@ public static class ModelBuilderExtensions
         builder.Entity<Order>().OwnsOne(o => o.Details,
             details =>
             {
-                details.WithOwner();
+                details.WithOwner().HasForeignKey("Id");
                 details.Property(d => d.FurnitureType).HasColumnName("FurnitureType").HasMaxLength(100).IsRequired();
                 details.Property(d => d.Width).HasColumnName("Width").HasPrecision(8, 2).IsRequired();
                 details.Property(d => d.Height).HasColumnName("Height").HasPrecision(8, 2).IsRequired();
