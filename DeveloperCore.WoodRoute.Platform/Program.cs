@@ -1,3 +1,9 @@
+using DeveloperCore.WoodRoute.Platform.Sales.Application.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Sales.Application.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Sales.Domain.Repositories;
+using DeveloperCore.WoodRoute.Platform.Sales.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Configuration;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Configuration.Extensions;
@@ -47,6 +53,11 @@ builder.Services.AddSharedLocalization();
 
 // Shared Bounded Context
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Sales Bounded Context
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderCommandService, OrderCommandService>();
+builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();
 
 var app = builder.Build();
 
