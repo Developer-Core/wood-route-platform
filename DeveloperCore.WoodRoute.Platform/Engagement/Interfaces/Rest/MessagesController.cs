@@ -1,5 +1,7 @@
 using System.Net.Mime;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices.Queries;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Transform;
@@ -17,7 +19,8 @@ namespace DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest;
 [Produces(MediaTypeNames.Application.Json)]
 [SwaggerTag("Available Message Endpoints.")]
 public class MessagesController(
-    IMessageCommandService messageCommandService)
+    IMessageCommandService messageCommandService,
+    IMessageQueryService messageQueryService)
     : ControllerBase
 {
     /// <summary>
@@ -53,5 +56,28 @@ public class MessagesController(
 
         var messageResource = MessageResourceAssembler.ToResourceFromEntity(result.Value);
         return CreatedAtAction(nameof(SendMessage), new { orderId }, messageResource);
+    }
+
+    /// <summary>
+    ///     Returns the message history for the specified order conversation in descending
+    ///     chronological order (newest first). Supports cursor-based pagination via the
+    ///     <paramref name="before" /> parameter.
+    /// </summary>
+    [HttpGet]
+    [SwaggerOperation(
+        "Get Message History",
+        "Get the message history of an order conversation, newest messages first.",
+        OperationId = "GetMessageHistory")]
+    [SwaggerResponse(200, "The message history was retrieved.", typeof(IEnumerable<MessageResource>))]
+    public async Task<IActionResult> GetMessageHistory(
+        int orderId,
+        [FromQuery] int limit = 20,
+        [FromQuery] DateTimeOffset? before = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetMessagesQuery(orderId, limit, before);
+        var messages = await messageQueryService.Handle(query, cancellationToken);
+        var resources = messages.Select(MessageResourceAssembler.ToResourceFromEntity);
+        return Ok(resources);
     }
 }
