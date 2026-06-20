@@ -47,6 +47,34 @@ public class OrderCommandService(IOrderRepository orderRepository, IUnitOfWork u
         return ApplyToOrderAsync(command.OrderId, order => order.Reject(), cancellationToken);
     }
 
+    /// <inheritdoc />
+    public Task<Result<Order>> Handle(GenerateQuoteCommand command, CancellationToken cancellationToken = default)
+    {
+        return ApplyToOrderAsync(command.OrderId, order => order.GenerateQuote(command), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<Result<Order>> Handle(AcceptQuoteCommand command, CancellationToken cancellationToken = default)
+    {
+        return ApplyToOrderAsync(command.OrderId, order => order.AcceptQuote(), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<Result<Order>> Handle(RegisterPaymentCommand command, CancellationToken cancellationToken = default)
+    {
+        return ApplyToOrderAsync(command.OrderId, order => order.RegisterPayment(command), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<Result<Order>> Handle(ValidatePaymentCommand command, CancellationToken cancellationToken = default)
+    {
+        return ApplyToOrderAsync(command.OrderId,
+            order => command.IsApproved
+                ? order.ConfirmPayment(command.PaymentId)
+                : order.RejectPayment(command.PaymentId),
+            cancellationToken);
+    }
+
     /// <summary>
     ///     Loads the order, applies a guarded aggregate behavior and persists the changes on success.
     /// </summary>

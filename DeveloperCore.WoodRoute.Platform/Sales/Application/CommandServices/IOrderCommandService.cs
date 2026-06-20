@@ -33,4 +33,24 @@ public interface IOrderCommandService
     ///     Handles the reject order command.
     /// </summary>
     Task<Result<Order>> Handle(RejectOrderCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Handles the generate quote command.
+    /// </summary>
+    Task<Result<Order>> Handle(GenerateQuoteCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Handles the accept quote command.
+    /// </summary>
+    Task<Result<Order>> Handle(AcceptQuoteCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Handles the register payment command.
+    /// </summary>
+    Task<Result<Order>> Handle(RegisterPaymentCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Handles the validate payment command.
+    /// </summary>
+    Task<Result<Order>> Handle(ValidatePaymentCommand command, CancellationToken cancellationToken = default);
 }
