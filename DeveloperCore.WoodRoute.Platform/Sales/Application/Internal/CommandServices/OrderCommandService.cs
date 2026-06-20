@@ -47,6 +47,18 @@ public class OrderCommandService(IOrderRepository orderRepository, IUnitOfWork u
         return ApplyToOrderAsync(command.OrderId, order => order.Reject(), cancellationToken);
     }
 
+    /// <inheritdoc />
+    public Task<Result<Order>> Handle(GenerateQuoteCommand command, CancellationToken cancellationToken = default)
+    {
+        return ApplyToOrderAsync(command.OrderId, order => order.GenerateQuote(command), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<Result<Order>> Handle(AcceptQuoteCommand command, CancellationToken cancellationToken = default)
+    {
+        return ApplyToOrderAsync(command.OrderId, order => order.AcceptQuote(), cancellationToken);
+    }
+
     /// <summary>
     ///     Loads the order, applies a guarded aggregate behavior and persists the changes on success.
     /// </summary>
