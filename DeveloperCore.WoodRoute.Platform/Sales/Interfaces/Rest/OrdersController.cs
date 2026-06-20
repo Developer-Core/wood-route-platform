@@ -130,4 +130,68 @@ public class OrdersController(
         return SalesActionResultAssembler.ToActionResultFromResult(this, result,
             cancelledOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(cancelledOrder)));
     }
+
+    [HttpPost("{orderId:int}/quote")]
+    [SwaggerOperation("Generate Quote", "Generate the quote for a pending order.", OperationId = "GenerateQuote")]
+    [SwaggerResponse(200, "The quote was generated.", typeof(OrderResource))]
+    [SwaggerResponse(400, "The quote data is invalid.")]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not pending or already has a quote.")]
+    public async Task<IActionResult> GenerateQuote(int orderId, GenerateQuoteResource resource,
+        CancellationToken cancellationToken)
+    {
+        var generateQuoteCommand = GenerateQuoteCommandFromResourceAssembler.ToCommandFromResource(orderId, resource);
+        var result = await orderCommandService.Handle(generateQuoteCommand, cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+            quotedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(quotedOrder)));
+    }
+
+    [HttpPatch("{orderId:int}/quote/accept")]
+    [SwaggerOperation("Accept Quote", "Accept the quote proposed for an order.", OperationId = "AcceptQuote")]
+    [SwaggerResponse(200, "The quote was accepted.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The quote does not exist or was already decided.")]
+    public async Task<IActionResult> AcceptQuote(int orderId, CancellationToken cancellationToken)
+    {
+        var result = await orderCommandService.Handle(new AcceptQuoteCommand(orderId), cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+            quotedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(quotedOrder)));
+    }
+
+    [HttpPost("{orderId:int}/payments")]
+    [SwaggerOperation("Register Payment", "Register a payment for an order, pending receipt validation.",
+        OperationId = "RegisterPayment")]
+    [SwaggerResponse(200, "The payment was registered.", typeof(OrderResource))]
+    [SwaggerResponse(400, "The payment data is invalid.")]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not payable.")]
+    public async Task<IActionResult> RegisterPayment(int orderId, RegisterPaymentResource resource,
+        CancellationToken cancellationToken)
+    {
+        var registerPaymentCommand =
+            RegisterPaymentCommandFromResourceAssembler.ToCommandFromResource(orderId, resource);
+        var result = await orderCommandService.Handle(registerPaymentCommand, cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+            paidOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(paidOrder)));
+    }
+
+    [HttpPatch("{orderId:int}/payments/{paymentId:int}/validate")]
+    [SwaggerOperation("Validate Payment", "Validate a payment receipt, confirming or rejecting it.",
+        OperationId = "ValidatePayment")]
+    [SwaggerResponse(200, "The payment was validated.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order or payment was not found.")]
+    [SwaggerResponse(409, "The payment was already validated.")]
+    public async Task<IActionResult> ValidatePayment(int orderId, int paymentId, ValidatePaymentResource resource,
+        CancellationToken cancellationToken)
+    {
+        var validatePaymentCommand =
+            ValidatePaymentCommandFromResourceAssembler.ToCommandFromResource(orderId, paymentId, resource);
+        var result = await orderCommandService.Handle(validatePaymentCommand, cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+            validatedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(validatedOrder)));
+    }
 }

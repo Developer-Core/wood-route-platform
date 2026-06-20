@@ -41,7 +41,14 @@ public static class SalesActionResultAssembler
         return error.Code switch
         {
             var code when code == SalesErrors.OrderNotFound.Code => StatusCodes.Status404NotFound,
+            var code when code == SalesErrors.QuoteNotFound.Code => StatusCodes.Status404NotFound,
+            var code when code == SalesErrors.PaymentNotFound.Code => StatusCodes.Status404NotFound,
             var code when code == SalesErrors.OrderNotPending.Code => StatusCodes.Status409Conflict,
+            var code when code == SalesErrors.OrderNotPayable.Code => StatusCodes.Status409Conflict,
+            var code when code == SalesErrors.QuoteAlreadyExists.Code => StatusCodes.Status409Conflict,
+            var code when code == SalesErrors.QuoteAlreadyAccepted.Code => StatusCodes.Status409Conflict,
+            var code when code == SalesErrors.QuoteAlreadyDecided.Code => StatusCodes.Status409Conflict,
+            var code when code == SalesErrors.PaymentAlreadyValidated.Code => StatusCodes.Status409Conflict,
             "Sales.InvalidOrderStatusTransition" => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status400BadRequest
         };
