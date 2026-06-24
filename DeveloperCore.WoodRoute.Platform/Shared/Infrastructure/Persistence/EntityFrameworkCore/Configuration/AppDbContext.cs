@@ -1,3 +1,4 @@
+using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Sales.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
@@ -36,6 +37,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
 
         // Bounded context configurations will be applied here as each context is added.
         builder.ApplySalesConfiguration();
+        builder.ApplyEngagementConfiguration();
 
         // General Naming Convention for the database objects
         builder.UseSnakeCaseNamingConvention();

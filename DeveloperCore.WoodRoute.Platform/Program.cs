@@ -1,3 +1,9 @@
+using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Engagement.Application.OutboundServices;
+using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Repositories;
+using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.OutboundServices;
+using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Repositories;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.QueryServices;
@@ -58,6 +64,12 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderCommandService, OrderCommandService>();
 builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();
+
+// Engagement Bounded Context
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IMessageCommandService, MessageCommandService>();
+builder.Services.AddScoped<IMessageQueryService, MessageQueryService>();
+builder.Services.AddScoped<INotificationService, NoOpNotificationService>();
 
 var app = builder.Build();
 
