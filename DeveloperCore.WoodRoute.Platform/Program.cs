@@ -4,6 +4,10 @@ using DeveloperCore.WoodRoute.Platform.Engagement.Application.OutboundServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.OutboundServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Repositories;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Repositories;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Infrastructure.Persistence.EFC.Repositories;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.QueryServices;
@@ -70,6 +74,11 @@ builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IMessageCommandService, MessageCommandService>();
 builder.Services.AddScoped<IMessageQueryService, MessageQueryService>();
 builder.Services.AddScoped<INotificationService, NoOpNotificationService>();
+
+// Manufacturing Bounded Context
+builder.Services.AddScoped<IManufactureOrderRepository, ProductionRepository>();
+builder.Services.AddScoped<IProductionCommandService, ProductionCommandService>();
+builder.Services.AddScoped<IProductionQueryService, ProductionQueryService>();
 
 var app = builder.Build();
 
