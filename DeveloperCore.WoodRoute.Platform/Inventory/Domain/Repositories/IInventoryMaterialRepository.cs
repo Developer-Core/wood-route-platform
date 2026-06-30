@@ -1,12 +1,11 @@
-﻿namespace DeveloperCore.WoodRoute.Platform.Inventory.Domain.Repositories;
+﻿using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Aggregates;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Repositories;
 
-using Model.Aggregates;
+namespace DeveloperCore.WoodRoute.Platform.Inventory.Domain.Repositories;
 
-public interface IInventoryMaterialRepository
+/// <summary>
+/// Repository contract for inventory materials.
+/// </summary>
+public interface IInventoryMaterialRepository : IBaseRepository<InventoryMaterial>
 {
-    Task<InventoryMaterial?> FindByIdAsync(int id);
-    Task<IEnumerable<InventoryMaterial>> ListAsync();
-    Task AddAsync(InventoryMaterial material);
-    void Update(InventoryMaterial material);
-    void Remove(InventoryMaterial material);
 }
