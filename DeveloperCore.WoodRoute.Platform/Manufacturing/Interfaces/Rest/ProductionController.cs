@@ -2,6 +2,7 @@ using System.Net.Mime;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Commands;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest.Transform;
@@ -13,7 +14,6 @@ namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest;
 
 /// <summary>
 ///     REST controller for production planning and stage management.
-///     Exposes endpoints for defining stages and updating their status.
 /// </summary>
 [ApiController]
 [Route("api/v1/orders/{orderId:int}/stages")]
@@ -26,7 +26,6 @@ public class ProductionController(
 {
     /// <summary>
     ///     Defines the production stages for an accepted order.
-    ///     Returns 409 if the order is not accepted or if stages were already defined.
     /// </summary>
     [HttpPost]
     [SwaggerOperation(
@@ -44,8 +43,23 @@ public class ProductionController(
         var result = await productionCommandService.Handle(command, cancellationToken);
 
         return ManufacturingActionResultAssembler.ToActionResultFromResult(this, result,
-            order => CreatedAtAction(nameof(DefineProductionStages), new { orderId },
+            order => CreatedAtAction(nameof(GetStages), new { orderId },
                 StageResourceAssembler.ToResourceListFromOrder(order)));
+    }
+
+    /// <summary>
+    ///     Returns the production stages of an order for the client progress view.
+    /// </summary>
+    [HttpGet]
+    [SwaggerOperation(
+        "Get Production Stages",
+        "Get the ordered production stages of an order.",
+        OperationId = "GetProductionStages")]
+    [SwaggerResponse(200, "The stages were found and returned.", typeof(IEnumerable<StageResource>))]
+    public async Task<IActionResult> GetStages(int orderId, CancellationToken cancellationToken)
+    {
+        var stages = await productionQueryService.Handle(new GetStagesByOrderIdQuery(orderId), cancellationToken);
+        return Ok(StageResourceAssembler.ToResourceListFromStages(stages));
     }
 
     /// <summary>
