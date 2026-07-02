@@ -4,6 +4,12 @@ using DeveloperCore.WoodRoute.Platform.Engagement.Application.OutboundServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.OutboundServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Repositories;
+using DeveloperCore.WoodRoute.Platform.Inventory.Application.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Inventory.Application.Internal.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Inventory.Application.Internal.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Inventory.Application.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Repositories;
+using DeveloperCore.WoodRoute.Platform.Inventory.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Repositories;
@@ -68,6 +74,11 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderCommandService, OrderCommandService>();
 builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();
+
+// Inventory Bounded Context
+builder.Services.AddScoped<IInventoryMaterialRepository, InventoryMaterialRepository>();
+builder.Services.AddScoped<IInventoryMaterialCommandService, InventoryMaterialCommandService>();
+builder.Services.AddScoped<IInventoryMaterialQueryService, InventoryMaterialQueryService>();
 
 // Engagement Bounded Context
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
