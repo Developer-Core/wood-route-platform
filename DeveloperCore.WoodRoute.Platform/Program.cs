@@ -10,8 +10,10 @@ using DeveloperCore.WoodRoute.Platform.Inventory.Application.Internal.QueryServi
 using DeveloperCore.WoodRoute.Platform.Inventory.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Inventory.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Infrastructure.Persistence.EFC.Repositories;
 using DeveloperCore.WoodRoute.Platform.Profiles.Application.CommandServices;

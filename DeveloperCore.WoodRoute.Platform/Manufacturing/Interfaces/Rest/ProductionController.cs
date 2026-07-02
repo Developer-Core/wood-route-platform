@@ -1,6 +1,6 @@
 using System.Net.Mime;
-using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.CommandServices;
-using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Commands;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.ValueObjects;
