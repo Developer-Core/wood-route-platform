@@ -1,5 +1,6 @@
 using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Infrastructure.Persistence.EFC.Configuration.Extensions;
+using DeveloperCore.WoodRoute.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Sales.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
@@ -40,6 +41,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         builder.ApplySalesConfiguration();
         builder.ApplyEngagementConfiguration();
         builder.ApplyManufacturingConfiguration();
+        builder.ApplyProfilesConfiguration();
 
         // General Naming Convention for the database objects
         builder.UseSnakeCaseNamingConvention();
