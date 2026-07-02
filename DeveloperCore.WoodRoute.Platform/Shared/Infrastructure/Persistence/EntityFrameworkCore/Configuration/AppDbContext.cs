@@ -1,4 +1,5 @@
 using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Configuration.Extensions;
+using DeveloperCore.WoodRoute.Platform.Inventory.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Infrastructure.Persistence.EFC.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Sales.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
@@ -39,6 +40,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
 
         // Bounded context configurations will be applied here as each context is added.
         builder.ApplySalesConfiguration();
+        builder.ApplyInventoryConfiguration();
         builder.ApplyEngagementConfiguration();
         builder.ApplyManufacturingConfiguration();
         builder.ApplyProfilesConfiguration();

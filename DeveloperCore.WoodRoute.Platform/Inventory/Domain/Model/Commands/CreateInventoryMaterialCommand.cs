@@ -3,7 +3,6 @@
 /// <summary>
 ///     Command to create a new inventory material.
 /// </summary>
-
 public record CreateInventoryMaterialCommand(
     string MaterialType,
     decimal Quantity,
