@@ -1,21 +1,16 @@
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Events;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Entities;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.ValueObjects;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Entities;
 
 namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Aggregates;
 
 /// <summary>
-///     Aggregate root for the manufacturing process of an order.
-///     Groups all the production stages and guards the business rules
-///     around defining and updating them.
+///     Aggregate root for the manufacturing process of a sales order.
 /// </summary>
-/// <remarks>
-///     The <see cref="SalesOrderId" /> is a reference to the Order in the Sales context.
-///     We don't hold a navigation property to avoid coupling between bounded contexts —
-///     just the foreign key integer is enough here.
-/// </remarks>
 public class ManufactureOrder : AggregateRoot, IAuditableEntity
 {
     private readonly List<Stage> _stages = [];
@@ -55,43 +50,40 @@ public class ManufactureOrder : AggregateRoot, IAuditableEntity
     public DateTimeOffset? UpdatedAt { get; set; }
 
     /// <summary>
-    ///     Defines the production stages for this order.
-    ///     Can only be called once — stages cannot be redefined after they are set.
+    ///     Defines the production stages for this order. Can only be called once.
     /// </summary>
-    /// <param name="stageDefinitions">
-    ///     List of (name, estimatedTimeInDays) pairs in the desired execution order.
-    /// </param>
-    public bool DefineStages(IEnumerable<(string Name, int EstimatedTimeInDays)> stageDefinitions)
+    public Error DefineStages(IEnumerable<(string Name, int EstimatedTimeInDays)> stageDefinitions)
     {
-        if (StagesAreDefined) return false;
+        if (StagesAreDefined) return ManufacturingErrors.StagesAlreadyDefined;
+
+        var definitions = stageDefinitions.ToList();
+        if (definitions.Count == 0) return ManufacturingErrors.EmptyStageList;
 
         var index = 0;
-        foreach (var (name, days) in stageDefinitions)
+        foreach (var (name, days) in definitions)
         {
             _stages.Add(new Stage(Id, name, days, index));
             index++;
         }
 
         StagesAreDefined = true;
-        return true;
+        return Error.None;
     }
 
     /// <summary>
     ///     Updates the status of a specific stage and raises <see cref="StageUpdatedDomainEvent" />.
-    ///     Returns false if the stage is not found or the transition is invalid.
     /// </summary>
-    public bool UpdateStageStatus(int stageId, EStageStatus newStatus, int updatedByUserId)
+    public Error UpdateStageStatus(int stageId, EStageStatus newStatus, int updatedByUserId)
     {
         var stage = _stages.FirstOrDefault(s => s.Id == stageId);
-        if (stage is null) return false;
+        if (stage is null) return ManufacturingErrors.StageNotFound;
 
-        var updated = stage.TryUpdateStatus(newStatus);
-        if (!updated) return false;
+        var error = stage.ChangeStatus(newStatus);
+        if (error != Error.None) return error;
 
-        // Raise the event so Engagement can inform the client about progress
         RaiseDomainEvent(new StageUpdatedDomainEvent(
             Id, stageId, stage.Name, newStatus.ToString(), updatedByUserId, DateTimeOffset.UtcNow));
 
-        return true;
+        return Error.None;
     }
 }
