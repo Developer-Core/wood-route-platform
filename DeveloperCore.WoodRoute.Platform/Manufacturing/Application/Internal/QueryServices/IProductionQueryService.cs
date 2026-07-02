@@ -1,5 +1,5 @@
-using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.QueryServices.Queries;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Aggregates;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Entities;
 
 namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.QueryServices;

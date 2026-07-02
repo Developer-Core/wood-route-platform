@@ -1,5 +1,5 @@
-using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.CommandServices.Commands;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Aggregates;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Commands;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Entities;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Repositories;
