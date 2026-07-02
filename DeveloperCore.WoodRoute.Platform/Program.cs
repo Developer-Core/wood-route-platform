@@ -103,7 +103,7 @@ builder.Services.AddScoped<IMessageQueryService, MessageQueryService>();
 builder.Services.AddScoped<INotificationService, NoOpNotificationService>();
 
 // Manufacturing Bounded Context
-builder.Services.AddScoped<IManufactureOrderRepository, ProductionRepository>();
+builder.Services.AddScoped<IManufactureOrderRepository, ManufactureOrderRepository>();
 builder.Services.AddScoped<IProductionCommandService, ProductionCommandService>();
 builder.Services.AddScoped<IProductionQueryService, ProductionQueryService>();
 
