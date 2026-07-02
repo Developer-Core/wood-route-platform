@@ -82,13 +82,13 @@ builder.Services.AddScoped<IProductionQueryService, ProductionQueryService>();
 
 var app = builder.Build();
 
-// Verify if the database exists and create it if it doesn't
+// Apply pending migrations on startup, creating the database if it doesn't exist
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
 
-    context.Database.EnsureCreated();
+    context.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.
