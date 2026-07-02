@@ -3,7 +3,6 @@
 /// <summary>
 ///     Command to update an existing inventory material.
 /// </summary>
-
 public record UpdateInventoryMaterialCommand(
     int MaterialId,
     decimal Quantity,
