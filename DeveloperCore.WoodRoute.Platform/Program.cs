@@ -20,12 +20,14 @@ using DeveloperCore.WoodRoute.Platform.Profiles.Application.Internal.QueryServic
 using DeveloperCore.WoodRoute.Platform.Profiles.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Profiles.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using DeveloperCore.WoodRoute.Platform.Sales.Application.Acl;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Sales.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Acl;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Configuration;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Configuration.Extensions;
@@ -80,6 +82,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderCommandService, OrderCommandService>();
 builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();
+builder.Services.AddScoped<ISalesContextFacade, SalesContextFacade>();
 
 // Profiles Bounded Context
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();

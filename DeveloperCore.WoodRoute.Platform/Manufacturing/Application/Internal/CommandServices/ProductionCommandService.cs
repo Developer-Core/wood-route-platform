@@ -3,8 +3,7 @@ using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Entities;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Repositories;
-using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.ValueObjects;
-using DeveloperCore.WoodRoute.Platform.Sales.Domain.Repositories;
+using DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Acl;
 using DeveloperCore.WoodRoute.Platform.Shared.Application.Model;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Repositories;
@@ -14,22 +13,17 @@ namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.Co
 /// <summary>
 ///     Handles production commands for manufacture orders.
 /// </summary>
-/// <remarks>
-///     We depend on <see cref="IOrderRepository" /> from the Sales context to verify the order status
-///     before allowing stages to be defined. This is an allowed anti-corruption layer query between
-///     bounded contexts, since they share the same database in this deployment.
-/// </remarks>
 public class ProductionCommandService(
     IManufactureOrderRepository manufactureOrderRepository,
-    IOrderRepository orderRepository,
+    ISalesContextFacade salesContextFacade,
     IUnitOfWork unitOfWork) : IProductionCommandService
 {
     /// <inheritdoc />
     public async Task<Result<ManufactureOrder>> Handle(DefineStagesCommand command,
         CancellationToken cancellationToken = default)
     {
-        var salesOrder = await orderRepository.FindByIdAsync(command.SalesOrderId, cancellationToken);
-        if (salesOrder is null || salesOrder.Status != EOrderStatus.Accepted)
+        var isAccepted = await salesContextFacade.IsOrderAcceptedAsync(command.SalesOrderId);
+        if (!isAccepted)
             return Result<ManufactureOrder>.Failure(ManufacturingErrors.OrderNotAccepted);
 
         var manufactureOrder =
