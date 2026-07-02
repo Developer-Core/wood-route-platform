@@ -1,18 +1,19 @@
-using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Events;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Entities;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Errors;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Events;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
-using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Entities;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Events;
 
 namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Aggregates;
 
 /// <summary>
 ///     Aggregate root for the manufacturing process of a sales order.
 /// </summary>
-public class ManufactureOrder : AggregateRoot, IAuditableEntity
+public class ManufactureOrder : IAuditableEntity
 {
+    private readonly List<IEvent> _domainEvents = [];
     private readonly List<Stage> _stages = [];
 
     private ManufactureOrder()
@@ -45,6 +46,11 @@ public class ManufactureOrder : AggregateRoot, IAuditableEntity
 
     public IReadOnlyCollection<Stage> Stages => _stages.AsReadOnly();
 
+    /// <summary>
+    ///     Domain events raised by the aggregate, awaiting dispatch by the infrastructure layer.
+    /// </summary>
+    public IReadOnlyCollection<IEvent> DomainEvents => _domainEvents.AsReadOnly();
+
     // IAuditableEntity
     public DateTimeOffset? CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
@@ -71,7 +77,7 @@ public class ManufactureOrder : AggregateRoot, IAuditableEntity
     }
 
     /// <summary>
-    ///     Updates the status of a specific stage and raises <see cref="StageUpdatedDomainEvent" />.
+    ///     Updates the status of a specific stage and raises <see cref="StageUpdatedEvent" />.
     /// </summary>
     public Error UpdateStageStatus(int stageId, EStageStatus newStatus, int updatedByUserId)
     {
@@ -81,9 +87,22 @@ public class ManufactureOrder : AggregateRoot, IAuditableEntity
         var error = stage.ChangeStatus(newStatus);
         if (error != Error.None) return error;
 
-        RaiseDomainEvent(new StageUpdatedDomainEvent(
+        RaiseDomainEvent(new StageUpdatedEvent(
             Id, stageId, stage.Name, newStatus.ToString(), updatedByUserId, DateTimeOffset.UtcNow));
 
         return Error.None;
+    }
+
+    /// <summary>
+    ///     Clears the collected domain events once they have been dispatched.
+    /// </summary>
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
+    }
+
+    private void RaiseDomainEvent(IEvent domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
     }
 }

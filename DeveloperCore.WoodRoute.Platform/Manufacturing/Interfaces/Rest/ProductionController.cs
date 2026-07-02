@@ -66,8 +66,6 @@ public class ProductionController(
 
     /// <summary>
     ///     Updates the status of a specific production stage.
-    ///     Returns 403 if the requesting user is not the assigned carpenter.
-    ///     Publishes <c>StageUpdatedDomainEvent</c> on success.
     /// </summary>
     [HttpPatch("{stageId:int}")]
     [SwaggerOperation(
