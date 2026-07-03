@@ -5,7 +5,7 @@ using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityF
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Repositories;
+namespace DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
 /// <summary>
 ///     EF Core implementation of <see cref="IConversationRepository" />.

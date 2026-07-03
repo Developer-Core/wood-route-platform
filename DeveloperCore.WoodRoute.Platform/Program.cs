@@ -5,7 +5,7 @@ using DeveloperCore.WoodRoute.Platform.Engagement.Application.OutboundServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.OutboundServices;
-using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Repositories;
+using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using DeveloperCore.WoodRoute.Platform.Inventory.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Inventory.Application.Internal.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Inventory.Application.Internal.QueryServices;
