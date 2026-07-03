@@ -1,16 +1,13 @@
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.ValueObjects;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Entities;
 
 namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Entities;
 
 /// <summary>
-///     Represents a single production stage within a manufacture order.
-///     Examples: Diseno, Corte, Ensamblado, Acabado, Entrega.
+///     A single production stage within a manufacture order.
 /// </summary>
-/// <remarks>
-///     Stages always belong to a ManufactureOrder and are created through it.
-///     Status transitions are validated in the aggregate to prevent invalid changes.
-/// </remarks>
 public class Stage : IAuditableEntity
 {
     private Stage()
@@ -36,10 +33,7 @@ public class Stage : IAuditableEntity
     /// <summary>Estimated number of working days this stage will take.</summary>
     public int EstimatedTimeInDays { get; private set; }
 
-    /// <summary>
-    ///     Position of this stage in the overall production sequence.
-    ///     Useful for displaying stages in order on the frontend.
-    /// </summary>
+    /// <summary>Position of this stage in the production sequence (0-based).</summary>
     public int OrderIndex { get; private set; }
 
     public EStageStatus Status { get; private set; }
@@ -52,21 +46,24 @@ public class Stage : IAuditableEntity
     public DateTimeOffset? UpdatedAt { get; set; }
 
     /// <summary>
-    ///     Updates the status of this stage.
-    ///     Only forward transitions are allowed: Pending -> InProgress -> Completed.
+    ///     Changes the status following the allowed flow Pending -> InProgress -> Completed.
     /// </summary>
-    public bool TryUpdateStatus(EStageStatus newStatus)
+    public Error ChangeStatus(EStageStatus newStatus)
     {
-        // Prevent backwards transitions or same-status updates
-        if (newStatus <= Status) return false;
-
-        Status = newStatus;
-
-        if (newStatus == EStageStatus.InProgress)
-            StartedAt = DateTimeOffset.UtcNow;
-        else if (newStatus == EStageStatus.Completed)
-            CompletedAt = DateTimeOffset.UtcNow;
-
-        return true;
+        switch (newStatus)
+        {
+            case EStageStatus.InProgress:
+                if (Status is not EStageStatus.Pending) return ManufacturingErrors.InvalidStageTransition;
+                Status = EStageStatus.InProgress;
+                StartedAt = DateTimeOffset.UtcNow;
+                return Error.None;
+            case EStageStatus.Completed:
+                if (Status is not EStageStatus.InProgress) return ManufacturingErrors.InvalidStageTransition;
+                Status = EStageStatus.Completed;
+                CompletedAt = DateTimeOffset.UtcNow;
+                return Error.None;
+            default:
+                return ManufacturingErrors.InvalidStageTransition;
+        }
     }
 }
