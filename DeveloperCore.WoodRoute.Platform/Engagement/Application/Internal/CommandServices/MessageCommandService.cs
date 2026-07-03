@@ -1,4 +1,5 @@
-using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.CommandServices.Commands;
+using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Commands;
+using DeveloperCore.WoodRoute.Platform.Engagement.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.OutboundServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Entities;
@@ -16,6 +17,15 @@ namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.Comma
 ///     If a conversation does not exist yet for the given order, one is automatically created.
 ///     This avoids requiring a separate step to open a conversation before sending the first message.
 /// </remarks>
+/// <param name="conversationRepository">
+///     The conversation repository.
+/// </param>
+/// <param name="unitOfWork">
+///     The unit of work.
+/// </param>
+/// <param name="notificationService">
+///     The notification service used to notify the other party about new messages.
+/// </param>
 public class MessageCommandService(
     IConversationRepository conversationRepository,
     IUnitOfWork unitOfWork,

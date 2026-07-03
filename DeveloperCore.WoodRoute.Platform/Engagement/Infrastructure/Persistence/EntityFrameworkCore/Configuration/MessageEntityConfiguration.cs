@@ -2,7 +2,7 @@ using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Configuration;
+namespace DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 
 /// <summary>
 ///     EF Core configuration for the <see cref="Message" /> entity.

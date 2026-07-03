@@ -1,9 +1,9 @@
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Entities;
-using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Configuration;
+using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 using Microsoft.EntityFrameworkCore;
 
-namespace DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EFC.Configuration.Extensions;
+namespace DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
 /// <summary>
 ///     Model builder extensions for the Engagement bounded context.
