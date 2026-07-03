@@ -21,6 +21,12 @@ public class Profile : IAuditableEntity
         Email = null!;
     }
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="Profile" /> aggregate from a create command.
+    /// </summary>
+    /// <param name="command">
+    ///     The <see cref="CreateProfileCommand" /> carrying the initial profile data.
+    /// </param>
     public Profile(CreateProfileCommand command)
     {
         Name = new PersonName(command.FirstName, command.LastName);
@@ -47,6 +53,12 @@ public class Profile : IAuditableEntity
     /// <summary>
     ///     Updates the personal information of the profile.
     /// </summary>
+    /// <param name="command">
+    ///     The <see cref="UpdateProfileCommand" /> carrying the updated profile data.
+    /// </param>
+    /// <returns>
+    ///     A domain <see cref="Error" />; <see cref="Error.None" /> on success.
+    /// </returns>
     public Error Update(UpdateProfileCommand command)
     {
         Name = new PersonName(command.FirstName, command.LastName);

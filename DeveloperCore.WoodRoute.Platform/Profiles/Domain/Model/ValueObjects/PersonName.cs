@@ -5,6 +5,16 @@ namespace DeveloperCore.WoodRoute.Platform.Profiles.Domain.Model.ValueObjects;
 /// </summary>
 public record PersonName
 {
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="PersonName" /> value object.
+    /// </summary>
+    /// <param name="firstName">
+    ///     The first name. Must not be null or empty.
+    /// </param>
+    /// <param name="lastName">
+    ///     The last name. Must not be null or empty.
+    /// </param>
+    /// <exception cref="ArgumentException">Thrown if <paramref name="firstName" /> or <paramref name="lastName" /> is null or empty.</exception>
     public PersonName(string firstName, string lastName)
     {
         if (string.IsNullOrWhiteSpace(firstName))
