@@ -7,6 +7,7 @@ using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest.Transform;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
+using DeveloperCore.WoodRoute.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -21,7 +22,8 @@ namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest;
 [SwaggerTag("Available Production Stage Endpoints.")]
 public class ProductionController(
     IProductionCommandService productionCommandService,
-    IProductionQueryService productionQueryService)
+    IProductionQueryService productionQueryService,
+    ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
     /// <summary>
@@ -42,7 +44,7 @@ public class ProductionController(
         var command = StageResourceAssembler.ToCommandFromResource(orderId, resource);
         var result = await productionCommandService.Handle(command, cancellationToken);
 
-        return ManufacturingActionResultAssembler.ToActionResultFromResult(this, result,
+        return ManufacturingActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             order => CreatedAtAction(nameof(GetStages), new { orderId },
                 StageResourceAssembler.ToResourceListFromOrder(order)));
     }
@@ -79,14 +81,18 @@ public class ProductionController(
         CancellationToken cancellationToken)
     {
         if (!Enum.TryParse<EStageStatus>(resource.Status, ignoreCase: true, out var parsedStatus))
-            return ManufacturingActionResultAssembler.ToProblemFromError(this,
-                new Error("Manufacturing.InvalidStatusValue",
-                    $"'{resource.Status}' is not a valid stage status. Allowed values: Pending, InProgress, Completed."));
+        {
+            var invalidStatusError = new Error("Manufacturing.InvalidStatusValue",
+                $"'{resource.Status}' is not a valid stage status. Allowed values: Pending, InProgress, Completed.");
+            return problemDetailsFactory.CreateFromError(this,
+                ManufacturingActionResultAssembler.ToStatusCode(invalidStatusError), invalidStatusError,
+                resource.Status);
+        }
 
         var command = new UpdateStageStatusCommand(orderId, stageId, parsedStatus, resource.RequestingUserId);
         var result = await productionCommandService.Handle(command, cancellationToken);
 
-        return ManufacturingActionResultAssembler.ToActionResultFromResult(this, result,
+        return ManufacturingActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             stage => Ok(StageResourceAssembler.ToResourceFromEntity(stage)));
     }
 }

@@ -42,6 +42,7 @@ using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Interfaces.AspNetCo
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using DeveloperCore.WoodRoute.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -85,6 +86,7 @@ builder.Services.AddSharedLocalization();
 // Dependency Injection
 
 // Shared Bounded Context
+builder.Services.AddScoped<ProblemDetailsFactory>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 

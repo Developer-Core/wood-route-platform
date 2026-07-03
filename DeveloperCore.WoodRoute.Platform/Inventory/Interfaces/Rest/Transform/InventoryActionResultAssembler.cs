@@ -2,6 +2,7 @@ using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Shared.Application.Model;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
+using DeveloperCore.WoodRoute.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DeveloperCore.WoodRoute.Platform.Inventory.Interfaces.Rest.Transform;
@@ -30,34 +31,25 @@ public static class InventoryActionResultAssembler
     /// <returns>
     ///     The success <see cref="IActionResult" /> when the result succeeds; otherwise a problem details response.
     /// </returns>
-    public static IActionResult ToActionResultFromResult(ControllerBase controller, Result<InventoryMaterial> result,
+    public static IActionResult ToActionResultFromResult(ControllerBase controller,
+        ProblemDetailsFactory problemDetailsFactory, Result<InventoryMaterial> result,
         Func<InventoryMaterial, IActionResult> successAction)
     {
-        return result.IsSuccess ? successAction(result.Value) : ToProblemFromError(controller, result.Error);
+        return result.IsSuccess
+            ? successAction(result.Value)
+            : problemDetailsFactory.CreateFromError(controller, ToStatusCode(result.Error), result.Error);
     }
 
     /// <summary>
-    ///     Converts a domain error to a problem details response.
+    ///     Maps a domain error to its corresponding HTTP status code.
     /// </summary>
-    /// <param name="controller">
-    ///     The <see cref="ControllerBase" /> used to build the response.
-    /// </param>
     /// <param name="error">
-    ///     The domain <see cref="Error" /> to convert.
+    ///     The domain <see cref="Error" /> to map.
     /// </param>
     /// <returns>
-    ///     A problem details <see cref="IActionResult" /> representing the error.
+    ///     The HTTP status code representing the error.
     /// </returns>
-    public static IActionResult ToProblemFromError(ControllerBase controller, Error error)
-    {
-        return controller.Problem(
-            statusCode: ToStatusCodeFromError(error),
-            title: error.Code,
-            detail: error.Message,
-            instance: controller.HttpContext.Request.Path);
-    }
-
-    private static int ToStatusCodeFromError(Error error)
+    public static int ToStatusCode(Error error)
     {
         return error.Code switch
         {
