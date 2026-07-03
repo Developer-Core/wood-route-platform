@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+              xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true" />
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Generic messages -->
+  <data name="Error.NullValue" xml:space="preserve">
+    <value>The specified value cannot be null.</value>
+  </data>
+  <data name="Error.NotFound" xml:space="preserve">
+    <value>The requested resource was not found.</value>
+  </data>
+  <data name="Error.Unauthorized" xml:space="preserve">
+    <value>You are not authorized to perform this action.</value>
+  </data>
+  <data name="Error.Forbidden" xml:space="preserve">
+    <value>Access to this resource is forbidden.</value>
+  </data>
+  <data name="Error.Conflict" xml:space="preserve">
+    <value>A conflict occurred with the current state of the resource.</value>
+  </data>
+  <data name="Error.BadRequest" xml:space="preserve">
+    <value>The request contains invalid data.</value>
+  </data>
+  <data name="Error.InternalServer" xml:space="preserve">
+    <value>An unexpected error occurred. Please try again later.</value>
+  </data>
+  <data name="Error.ValidationFailed" xml:space="preserve">
+    <value>One or more validation errors occurred.</value>
+  </data>
+
+  <!-- Audit -->
+  <data name="Audit.CreatedAt" xml:space="preserve">
+    <value>Created at</value>
+  </data>
+  <data name="Audit.UpdatedAt" xml:space="preserve">
+    <value>Updated at</value>
+  </data>
+
+  <!-- Connection -->
+  <data name="Config.MissingConnectionString" xml:space="preserve">
+    <value>The database connection string 'DefaultConnection' was not found in configuration.</value>
+  </data>
+
+  <!-- Sales bounded context -->
+  <data name="Sales.OrderNotFound" xml:space="preserve">
+    <value>The specified order was not found.</value>
+  </data>
+  <data name="Sales.OrderNotPending" xml:space="preserve">
+    <value>The operation is only allowed while the order is pending.</value>
+  </data>
+  <data name="Sales.QuoteNotFound" xml:space="preserve">
+    <value>The order does not have a quote yet.</value>
+  </data>
+  <data name="Sales.QuoteAlreadyExists" xml:space="preserve">
+    <value>The order already has a quote.</value>
+  </data>
+  <data name="Sales.QuoteAlreadyAccepted" xml:space="preserve">
+    <value>The quote has already been accepted.</value>
+  </data>
+  <data name="Sales.QuoteAlreadyDecided" xml:space="preserve">
+    <value>The quote has already been accepted or rejected.</value>
+  </data>
+  <data name="Sales.InvalidQuoteCosts" xml:space="preserve">
+    <value>Quote costs cannot be negative and the total must be positive.</value>
+  </data>
+  <data name="Sales.InvalidQuoteProductionDays" xml:space="preserve">
+    <value>The estimated production days must be a positive value.</value>
+  </data>
+  <data name="Sales.PaymentNotFound" xml:space="preserve">
+    <value>The specified payment was not found in the order.</value>
+  </data>
+  <data name="Sales.PaymentAlreadyValidated" xml:space="preserve">
+    <value>The payment receipt has already been validated.</value>
+  </data>
+  <data name="Sales.InvalidPaymentAmount" xml:space="preserve">
+    <value>The payment amount must be a positive value.</value>
+  </data>
+  <data name="Sales.PaymentReceiptReferenceRequired" xml:space="preserve">
+    <value>A receipt reference is required to register a payment.</value>
+  </data>
+  <data name="Sales.OrderNotPayable" xml:space="preserve">
+    <value>Payments can only be registered for accepted or in-production orders.</value>
+  </data>
+  <data name="Sales.InvalidOrderStatusTransition" xml:space="preserve">
+    <value>The order cannot transition from {0} to {1}.</value>
+  </data>
+  <data name="Sales.InvalidOrderFilter" xml:space="preserve">
+    <value>Filter orders by either customerId or carpenterId, not both.</value>
+  </data>
+
+  <!-- Profiles bounded context -->
+  <data name="Profiles.ProfileNotFound" xml:space="preserve">
+    <value>The specified profile was not found.</value>
+  </data>
+  <data name="Profiles.EmailAlreadyRegistered" xml:space="preserve">
+    <value>A profile with the specified email address already exists.</value>
+  </data>
+
+  <!-- Inventory bounded context -->
+  <data name="Inventory.MaterialNotFound" xml:space="preserve">
+    <value>The specified inventory material was not found.</value>
+  </data>
+  <data name="Inventory.InvalidQuantity" xml:space="preserve">
+    <value>Quantity must be greater than zero.</value>
+  </data>
+  <data name="Inventory.InvalidMinimumStock" xml:space="preserve">
+    <value>Minimum stock must be greater than or equal to zero.</value>
+  </data>
+
+  <!-- Manufacturing bounded context -->
+  <data name="Manufacturing.ManufactureOrderNotFound" xml:space="preserve">
+    <value>No manufacture order was found for the specified sales order.</value>
+  </data>
+  <data name="Manufacturing.StagesAlreadyDefined" xml:space="preserve">
+    <value>The production stages for this order have already been defined and cannot be changed.</value>
+  </data>
+  <data name="Manufacturing.StageNotFound" xml:space="preserve">
+    <value>The specified stage was not found in this manufacture order.</value>
+  </data>
+  <data name="Manufacturing.InvalidStageTransition" xml:space="preserve">
+    <value>The stage status can only move forward: Pending -&gt; InProgress -&gt; Completed.</value>
+  </data>
+  <data name="Manufacturing.OrderNotAccepted" xml:space="preserve">
+    <value>Production stages can only be defined for orders that have been accepted by the carpenter.</value>
+  </data>
+  <data name="Manufacturing.UnauthorizedStageUpdate" xml:space="preserve">
+    <value>Only the carpenter assigned to this order can update its production stages.</value>
+  </data>
+  <data name="Manufacturing.EmptyStageList" xml:space="preserve">
+    <value>At least one production stage must be defined.</value>
+  </data>
+  <data name="Manufacturing.InvalidStatusValue" xml:space="preserve">
+    <value>'{0}' is not a valid stage status. Allowed values: Pending, InProgress, Completed.</value>
+  </data>
+
+  <!-- Engagement bounded context -->
+  <data name="Engagement.ConversationNotFound" xml:space="preserve">
+    <value>No conversation was found for the specified order.</value>
+  </data>
+  <data name="Engagement.MessageContentEmpty" xml:space="preserve">
+    <value>The message content cannot be empty.</value>
+  </data>
+  <data name="Engagement.TrackingIdNotFound" xml:space="preserve">
+    <value>No order was found with the specified tracking id. It may be invalid or the order may have been cancelled.</value>
+  </data>
+</root>
