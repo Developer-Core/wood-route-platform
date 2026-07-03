@@ -19,4 +19,18 @@ public class SalesContextFacade(IOrderQueryService orderQueryService) : ISalesCo
         var order = await orderQueryService.Handle(new GetOrderByIdQuery(orderId));
         return order is { Status: EOrderStatus.Accepted };
     }
+
+    /// <inheritdoc />
+    public async Task<int?> GetOrderIdByPublicTrackingIdAsync(Guid publicTrackingId)
+    {
+        var order = await orderQueryService.Handle(new GetOrderByPublicTrackingIdQuery(publicTrackingId));
+        return order?.Id;
+    }
+
+    /// <inheritdoc />
+    public async Task<Guid?> GetPublicTrackingIdByOrderIdAsync(int orderId)
+    {
+        var order = await orderQueryService.Handle(new GetOrderByIdQuery(orderId));
+        return order?.PublicTrackingId;
+    }
 }

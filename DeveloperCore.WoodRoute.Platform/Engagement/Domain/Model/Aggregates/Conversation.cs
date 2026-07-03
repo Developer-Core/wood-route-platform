@@ -25,11 +25,20 @@ public class Conversation : AggregateRoot, IAuditableEntity
     {
     }
 
-    public Conversation(int orderId, DateTimeOffset? estimatedDeliveryDate = null)
+    /// <summary>
+    ///     Creates a tracking conversation for an order.
+    /// </summary>
+    /// <param name="orderId">Identifier of the order in the Sales bounded context.</param>
+    /// <param name="publicTrackingId">
+    ///     The order's public tracking id, adopted so the unauthenticated tracking endpoint resolves
+    ///     the same id the client received when placing the order.
+    /// </param>
+    /// <param name="estimatedDeliveryDate">Optional estimated delivery date.</param>
+    public Conversation(int orderId, Guid publicTrackingId, DateTimeOffset? estimatedDeliveryDate = null)
     {
         OrderId = orderId;
-        // Generate a public-facing GUID so the client can track their order without auth
-        PublicTrackingId = Guid.NewGuid();
+        // Adopt the order's public tracking id so tracking works with the id the client already has
+        PublicTrackingId = publicTrackingId;
         CurrentStage = EProductionStage.NotStarted;
         EstimatedDeliveryDate = estimatedDeliveryDate;
         ProgressPercent = 0;
