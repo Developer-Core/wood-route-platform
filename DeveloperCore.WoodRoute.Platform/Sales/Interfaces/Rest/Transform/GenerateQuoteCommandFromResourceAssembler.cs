@@ -11,6 +11,15 @@ public static class GenerateQuoteCommandFromResourceAssembler
     /// <summary>
     ///     Converts a generate quote resource and the target order id to its command representation.
     /// </summary>
+    /// <param name="orderId">
+    ///     The identifier of the order to quote.
+    /// </param>
+    /// <param name="resource">
+    ///     The <see cref="GenerateQuoteResource" /> containing the data for generating the quote.
+    /// </param>
+    /// <returns>
+    ///     A new <see cref="GenerateQuoteCommand" /> instance.
+    /// </returns>
     public static GenerateQuoteCommand ToCommandFromResource(int orderId, GenerateQuoteResource resource)
     {
         return new GenerateQuoteCommand(

@@ -11,6 +11,15 @@ public static class RegisterPaymentCommandFromResourceAssembler
     /// <summary>
     ///     Converts a register payment resource and the target order id to its command representation.
     /// </summary>
+    /// <param name="orderId">
+    ///     The identifier of the order the payment belongs to.
+    /// </param>
+    /// <param name="resource">
+    ///     The <see cref="RegisterPaymentResource" /> containing the data for registering the payment.
+    /// </param>
+    /// <returns>
+    ///     A new <see cref="RegisterPaymentCommand" /> instance.
+    /// </returns>
     public static RegisterPaymentCommand ToCommandFromResource(int orderId, RegisterPaymentResource resource)
     {
         return new RegisterPaymentCommand(

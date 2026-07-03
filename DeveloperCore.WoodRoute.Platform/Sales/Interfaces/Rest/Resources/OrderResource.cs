@@ -3,6 +3,30 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest.Resources;
 /// <summary>
 ///     Order resource for the REST API.
 /// </summary>
+/// <param name="Id">
+///     The identifier of the order.
+/// </param>
+/// <param name="PublicTrackingId">
+///     The public tracking identifier of the order.
+/// </param>
+/// <param name="CustomerId">
+///     The identifier of the customer who placed the order.
+/// </param>
+/// <param name="CarpenterId">
+///     The identifier of the carpenter who received the order.
+/// </param>
+/// <param name="Status">
+///     The current status of the order.
+/// </param>
+/// <param name="Details">
+///     The <see cref="FurnitureDetailsResource" /> of the order.
+/// </param>
+/// <param name="Quote">
+///     The <see cref="QuoteResource" /> of the order, if any.
+/// </param>
+/// <param name="Payments">
+///     The <see cref="PaymentResource" /> collection of the order.
+/// </param>
 public record OrderResource(
     int Id,
     Guid PublicTrackingId,

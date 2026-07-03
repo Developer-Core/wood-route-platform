@@ -11,6 +11,12 @@ public static class QuoteResourceFromEntityAssembler
     /// <summary>
     ///     Converts a quote entity to its resource representation.
     /// </summary>
+    /// <param name="entity">
+    ///     The <see cref="Quote" /> entity to convert.
+    /// </param>
+    /// <returns>
+    ///     A new <see cref="QuoteResource" /> instance.
+    /// </returns>
     public static QuoteResource ToResourceFromEntity(Quote entity)
     {
         return new QuoteResource(

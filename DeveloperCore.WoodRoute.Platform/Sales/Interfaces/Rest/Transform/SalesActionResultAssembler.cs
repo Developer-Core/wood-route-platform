@@ -18,6 +18,18 @@ public static class SalesActionResultAssembler
     /// <summary>
     ///     Converts an order result to the success action result or a problem details response.
     /// </summary>
+    /// <param name="controller">
+    ///     The <see cref="ControllerBase" /> producing the response.
+    /// </param>
+    /// <param name="result">
+    ///     The <see cref="Result{Order}" /> to convert.
+    /// </param>
+    /// <param name="successAction">
+    ///     The action producing the success result from the order.
+    /// </param>
+    /// <returns>
+    ///     The success <see cref="IActionResult" /> when the result is successful, otherwise a problem details response.
+    /// </returns>
     public static IActionResult ToActionResultFromResult(ControllerBase controller, Result<Order> result,
         Func<Order, IActionResult> successAction)
     {
@@ -27,6 +39,15 @@ public static class SalesActionResultAssembler
     /// <summary>
     ///     Converts a domain error to a problem details response.
     /// </summary>
+    /// <param name="controller">
+    ///     The <see cref="ControllerBase" /> producing the response.
+    /// </param>
+    /// <param name="error">
+    ///     The <see cref="Error" /> to convert.
+    /// </param>
+    /// <returns>
+    ///     A problem details <see cref="IActionResult" /> for the error.
+    /// </returns>
     public static IActionResult ToProblemFromError(ControllerBase controller, Error error)
     {
         return controller.Problem(
