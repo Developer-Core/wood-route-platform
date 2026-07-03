@@ -1,18 +1,21 @@
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Events;
+
 namespace DeveloperCore.WoodRoute.Platform.Shared.Domain.Events;
 
 /// <summary>
-///     Defines a handler for a specific <see cref="IDomainEvent" />.
+///     Defines a handler for a specific domain <see cref="IEvent" />.
 /// </summary>
-/// <typeparam name="TDomainEvent">The type of domain event this handler processes.</typeparam>
+/// <typeparam name="TEvent">The type of domain event this handler processes.</typeparam>
 /// <remarks>
 ///     Each handler is responsible for a single type of domain event, following the
-///     Single Responsibility Principle.
+///     Single Responsibility Principle. Handlers are resolved from the dependency
+///     injection container and invoked by the <c>IDomainEventDispatcher</c>.
 ///     <para>
 ///         Example implementation:
 ///         <code>
-///         public class OrderPlacedDomainEventHandler : IDomainEventHandler&lt;OrderPlacedDomainEvent&gt;
+///         public class OrderPlacedEventHandler : IDomainEventHandler&lt;OrderPlacedEvent&gt;
 ///         {
-///             public Task HandleAsync(OrderPlacedDomainEvent domainEvent, CancellationToken cancellationToken)
+///             public Task HandleAsync(OrderPlacedEvent domainEvent, CancellationToken cancellationToken)
 ///             {
 ///                 // handle the event...
 ///                 return Task.CompletedTask;
@@ -21,7 +24,7 @@ namespace DeveloperCore.WoodRoute.Platform.Shared.Domain.Events;
 ///         </code>
 ///     </para>
 /// </remarks>
-public interface IDomainEventHandler<in TDomainEvent> where TDomainEvent : IDomainEvent
+public interface IDomainEventHandler<in TEvent> where TEvent : IEvent
 {
     /// <summary>
     ///     Handles the given domain event asynchronously.
@@ -29,5 +32,5 @@ public interface IDomainEventHandler<in TDomainEvent> where TDomainEvent : IDoma
     /// <param name="domainEvent">The domain event to handle.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
-    Task HandleAsync(TDomainEvent domainEvent, CancellationToken cancellationToken = default);
+    Task HandleAsync(TEvent domainEvent, CancellationToken cancellationToken = default);
 }
