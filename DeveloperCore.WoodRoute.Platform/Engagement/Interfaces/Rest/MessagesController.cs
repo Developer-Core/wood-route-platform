@@ -2,9 +2,9 @@ using System.Net.Mime;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Queries;
-using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Transform;
+using DeveloperCore.WoodRoute.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -20,7 +20,8 @@ namespace DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest;
 [SwaggerTag("Available Message Endpoints.")]
 public class MessagesController(
     IMessageCommandService messageCommandService,
-    IMessageQueryService messageQueryService)
+    IMessageQueryService messageQueryService,
+    ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
     /// <summary>
@@ -42,17 +43,8 @@ public class MessagesController(
         var result = await messageCommandService.Handle(command, cancellationToken);
 
         if (result.IsFailure)
-        {
-            var statusCode = result.Error.Code == EngagementErrors.MessageContentEmpty.Code
-                ? StatusCodes.Status400BadRequest
-                : StatusCodes.Status404NotFound;
-
-            return Problem(
-                statusCode: statusCode,
-                title: result.Error.Code,
-                detail: result.Error.Message,
-                instance: HttpContext.Request.Path);
-        }
+            return problemDetailsFactory.CreateFromError(this,
+                EngagementActionResultAssembler.ToStatusCode(result.Error), result.Error);
 
         var messageResource = MessageResourceFromEntityAssembler.ToResourceFromEntity(result.Value);
         return CreatedAtAction(nameof(SendMessage), new { orderId }, messageResource);

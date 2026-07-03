@@ -1,6 +1,7 @@
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Shared.Application.Model;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
+using DeveloperCore.WoodRoute.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest.Transform;
@@ -17,25 +18,18 @@ public static class ManufacturingActionResultAssembler
     /// <summary>
     ///     Converts a result to the success action result or a problem details response.
     /// </summary>
-    public static IActionResult ToActionResultFromResult<T>(ControllerBase controller, Result<T> result,
-        Func<T, IActionResult> successAction)
+    public static IActionResult ToActionResultFromResult<T>(ControllerBase controller,
+        ProblemDetailsFactory problemDetailsFactory, Result<T> result, Func<T, IActionResult> successAction)
     {
-        return result.IsSuccess ? successAction(result.Value) : ToProblemFromError(controller, result.Error);
+        return result.IsSuccess
+            ? successAction(result.Value)
+            : problemDetailsFactory.CreateFromError(controller, ToStatusCode(result.Error), result.Error);
     }
 
     /// <summary>
-    ///     Converts a domain error to a problem details response.
+    ///     Maps a domain error to its corresponding HTTP status code.
     /// </summary>
-    public static IActionResult ToProblemFromError(ControllerBase controller, Error error)
-    {
-        return controller.Problem(
-            statusCode: ToStatusCodeFromError(error),
-            title: error.Code,
-            detail: error.Message,
-            instance: controller.HttpContext.Request.Path);
-    }
-
-    private static int ToStatusCodeFromError(Error error)
+    public static int ToStatusCode(Error error)
     {
         return error.Code switch
         {

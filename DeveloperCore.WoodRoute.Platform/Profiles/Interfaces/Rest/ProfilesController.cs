@@ -5,6 +5,7 @@ using DeveloperCore.WoodRoute.Platform.Profiles.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Profiles.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Profiles.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Profiles.Interfaces.Rest.Transform;
+using DeveloperCore.WoodRoute.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -19,7 +20,8 @@ namespace DeveloperCore.WoodRoute.Platform.Profiles.Interfaces.Rest;
 [SwaggerTag("Available Profile Endpoints.")]
 public class ProfilesController(
     IProfileCommandService profileCommandService,
-    IProfileQueryService profileQueryService)
+    IProfileQueryService profileQueryService,
+    ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
     [HttpPost]
@@ -32,7 +34,7 @@ public class ProfilesController(
         var createProfileCommand = CreateProfileCommandFromResourceAssembler.ToCommandFromResource(resource);
         var result = await profileCommandService.Handle(createProfileCommand, cancellationToken);
 
-        return ProfilesActionResultAssembler.ToActionResultFromResult(this, result,
+        return ProfilesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             createdProfile => CreatedAtAction(nameof(GetProfileById), new { profileId = createdProfile.Id },
                 ProfileResourceFromEntityAssembler.ToResourceFromEntity(createdProfile)));
     }
@@ -58,7 +60,9 @@ public class ProfilesController(
         var profile = await profileQueryService.Handle(getProfileByIdQuery, cancellationToken);
 
         if (profile is null)
-            return ProfilesActionResultAssembler.ToProblemFromError(this, ProfileErrors.ProfileNotFound);
+            return problemDetailsFactory.CreateFromError(this,
+                ProfilesActionResultAssembler.ToStatusCode(ProfileErrors.ProfileNotFound),
+                ProfileErrors.ProfileNotFound);
         return Ok(ProfileResourceFromEntityAssembler.ToResourceFromEntity(profile));
     }
 
@@ -74,7 +78,7 @@ public class ProfilesController(
         var updateProfileCommand = UpdateProfileCommandFromResourceAssembler.ToCommandFromResource(profileId, resource);
         var result = await profileCommandService.Handle(updateProfileCommand, cancellationToken);
 
-        return ProfilesActionResultAssembler.ToActionResultFromResult(this, result,
+        return ProfilesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             updatedProfile => Ok(ProfileResourceFromEntityAssembler.ToResourceFromEntity(updatedProfile)));
     }
 }

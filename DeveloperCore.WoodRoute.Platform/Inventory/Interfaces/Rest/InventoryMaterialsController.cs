@@ -5,6 +5,7 @@ using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Inventory.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Inventory.Interfaces.Rest.Transform;
+using DeveloperCore.WoodRoute.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -19,7 +20,8 @@ namespace DeveloperCore.WoodRoute.Platform.Inventory.Interfaces.Rest;
 [SwaggerTag("Available Inventory Endpoints.")]
 public class InventoryMaterialsController(
     IInventoryMaterialCommandService inventoryMaterialCommandService,
-    IInventoryMaterialQueryService inventoryMaterialQueryService)
+    IInventoryMaterialQueryService inventoryMaterialQueryService,
+    ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
     [HttpPost]
@@ -33,7 +35,7 @@ public class InventoryMaterialsController(
         var createCommand = CreateInventoryMaterialCommandFromResourceAssembler.ToCommandFromResource(resource);
         var result = await inventoryMaterialCommandService.Handle(createCommand, cancellationToken);
 
-        return InventoryActionResultAssembler.ToActionResultFromResult(this, result,
+        return InventoryActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             createdMaterial => CreatedAtAction(nameof(GetInventoryMaterialById),
                 new { materialId = createdMaterial.Id },
                 InventoryMaterialResourceFromEntityAssembler.ToResourceFromEntity(createdMaterial)));
@@ -63,7 +65,9 @@ public class InventoryMaterialsController(
             cancellationToken);
 
         if (material is null)
-            return InventoryActionResultAssembler.ToProblemFromError(this, InventoryErrors.MaterialNotFound);
+            return problemDetailsFactory.CreateFromError(this,
+                InventoryActionResultAssembler.ToStatusCode(InventoryErrors.MaterialNotFound),
+                InventoryErrors.MaterialNotFound);
         return Ok(InventoryMaterialResourceFromEntityAssembler.ToResourceFromEntity(material));
     }
 
@@ -80,7 +84,7 @@ public class InventoryMaterialsController(
             UpdateInventoryMaterialCommandFromResourceAssembler.ToCommandFromResource(materialId, resource);
         var result = await inventoryMaterialCommandService.Handle(updateCommand, cancellationToken);
 
-        return InventoryActionResultAssembler.ToActionResultFromResult(this, result,
+        return InventoryActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             updatedMaterial => Ok(InventoryMaterialResourceFromEntityAssembler.ToResourceFromEntity(updatedMaterial)));
     }
 }

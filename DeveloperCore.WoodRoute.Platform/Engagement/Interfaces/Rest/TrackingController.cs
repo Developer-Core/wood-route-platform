@@ -3,6 +3,8 @@ using DeveloperCore.WoodRoute.Platform.Engagement.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Resources;
+using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Transform;
+using DeveloperCore.WoodRoute.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -17,7 +19,9 @@ namespace DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest;
 [Route("api/v1/tracking")]
 [Produces(MediaTypeNames.Application.Json)]
 [SwaggerTag("Available Tracking Endpoints.")]
-public class TrackingController(IMessageQueryService messageQueryService) : ControllerBase
+public class TrackingController(
+    IMessageQueryService messageQueryService,
+    ProblemDetailsFactory problemDetailsFactory) : ControllerBase
 {
     /// <summary>
     ///     Returns the current production status of an order using its public tracking id.
@@ -37,11 +41,9 @@ public class TrackingController(IMessageQueryService messageQueryService) : Cont
         var conversation = await messageQueryService.Handle(query, cancellationToken);
 
         if (conversation is null)
-            return Problem(
-                statusCode: StatusCodes.Status404NotFound,
-                title: EngagementErrors.TrackingIdNotFound.Code,
-                detail: EngagementErrors.TrackingIdNotFound.Message,
-                instance: HttpContext.Request.Path);
+            return problemDetailsFactory.CreateFromError(this,
+                EngagementActionResultAssembler.ToStatusCode(EngagementErrors.TrackingIdNotFound),
+                EngagementErrors.TrackingIdNotFound);
 
         var resource = new TrackingStatusResource(
             conversation.PublicTrackingId,
