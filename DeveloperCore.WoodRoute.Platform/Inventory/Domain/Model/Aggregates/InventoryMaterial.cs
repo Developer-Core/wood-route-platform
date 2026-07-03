@@ -2,8 +2,8 @@ using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Commands;
 using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Events;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Entities;
-using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Events;
 
 namespace DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Aggregates;
 
@@ -16,10 +16,8 @@ namespace DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Aggregates;
 ///     <see cref="LowStockDetectedEvent" /> is raised whenever an update leaves the available
 ///     quantity below the configured minimum stock.
 /// </remarks>
-public class InventoryMaterial : IAuditableEntity
+public class InventoryMaterial : AggregateRoot, IAuditableEntity
 {
-    private readonly List<IEvent> _domainEvents = [];
-
     private InventoryMaterial()
     {
         MaterialType = string.Empty;
@@ -49,11 +47,6 @@ public class InventoryMaterial : IAuditableEntity
     public string Unit { get; private set; }
     public decimal MinStock { get; private set; }
 
-    /// <summary>
-    ///     Domain events raised by the aggregate, awaiting dispatch by the infrastructure layer.
-    /// </summary>
-    public IReadOnlyCollection<IEvent> DomainEvents => _domainEvents.AsReadOnly();
-
     public DateTimeOffset? CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
 
@@ -68,18 +61,5 @@ public class InventoryMaterial : IAuditableEntity
         MinStock = command.MinStock;
         if (Quantity < MinStock) RaiseDomainEvent(new LowStockDetectedEvent(Id));
         return Error.None;
-    }
-
-    /// <summary>
-    ///     Clears the collected domain events once they have been dispatched.
-    /// </summary>
-    public void ClearDomainEvents()
-    {
-        _domainEvents.Clear();
-    }
-
-    private void RaiseDomainEvent(IEvent domainEvent)
-    {
-        _domainEvents.Add(domainEvent);
     }
 }
