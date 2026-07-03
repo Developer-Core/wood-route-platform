@@ -1,5 +1,5 @@
-using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.CommandServices.Commands;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Aggregates;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Commands;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Entities;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest.Resources;
 
@@ -34,13 +34,16 @@ public static class StageResourceAssembler
             stage.CompletedAt);
     }
 
-    /// <summary>
-    ///     Projects all stages of a <see cref="ManufactureOrder" /> to a list of resources,
-    ///     sorted by their execution order.
-    /// </summary>
+    /// <summary>Projects the stages of a <see cref="ManufactureOrder" /> to resources, ordered by sequence.</summary>
     public static IEnumerable<StageResource> ToResourceListFromOrder(ManufactureOrder order)
     {
-        return order.Stages
+        return ToResourceListFromStages(order.Stages);
+    }
+
+    /// <summary>Projects a collection of <see cref="Stage" /> entities to resources, ordered by sequence.</summary>
+    public static IEnumerable<StageResource> ToResourceListFromStages(IEnumerable<Stage> stages)
+    {
+        return stages
             .OrderBy(s => s.OrderIndex)
             .Select(ToResourceFromEntity);
     }

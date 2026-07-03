@@ -1,11 +1,12 @@
 using System.Net.Mime;
-using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.CommandServices;
-using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.CommandServices.Commands;
-using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.QueryServices;
-using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Errors;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Commands;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest.Transform;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -13,7 +14,6 @@ namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest;
 
 /// <summary>
 ///     REST controller for production planning and stage management.
-///     Exposes endpoints for defining stages and updating their status.
 /// </summary>
 [ApiController]
 [Route("api/v1/orders/{orderId:int}/stages")]
@@ -26,7 +26,6 @@ public class ProductionController(
 {
     /// <summary>
     ///     Defines the production stages for an accepted order.
-    ///     Returns 409 if the order is not accepted or if stages were already defined.
     /// </summary>
     [HttpPost]
     [SwaggerOperation(
@@ -43,31 +42,28 @@ public class ProductionController(
         var command = StageResourceAssembler.ToCommandFromResource(orderId, resource);
         var result = await productionCommandService.Handle(command, cancellationToken);
 
-        if (result.IsFailure)
-        {
-            var statusCode = result.Error.Code switch
-            {
-                var c when c == ManufacturingErrors.ManufactureOrderNotFound.Code => StatusCodes.Status404NotFound,
-                var c when c == ManufacturingErrors.OrderNotAccepted.Code => StatusCodes.Status409Conflict,
-                var c when c == ManufacturingErrors.StagesAlreadyDefined.Code => StatusCodes.Status409Conflict,
-                _ => StatusCodes.Status400BadRequest
-            };
+        return ManufacturingActionResultAssembler.ToActionResultFromResult(this, result,
+            order => CreatedAtAction(nameof(GetStages), new { orderId },
+                StageResourceAssembler.ToResourceListFromOrder(order)));
+    }
 
-            return Problem(
-                statusCode: statusCode,
-                title: result.Error.Code,
-                detail: result.Error.Message,
-                instance: HttpContext.Request.Path);
-        }
-
-        var resources = StageResourceAssembler.ToResourceListFromOrder(result.Value);
-        return CreatedAtAction(nameof(DefineProductionStages), new { orderId }, resources);
+    /// <summary>
+    ///     Returns the production stages of an order for the client progress view.
+    /// </summary>
+    [HttpGet]
+    [SwaggerOperation(
+        "Get Production Stages",
+        "Get the ordered production stages of an order.",
+        OperationId = "GetProductionStages")]
+    [SwaggerResponse(200, "The stages were found and returned.", typeof(IEnumerable<StageResource>))]
+    public async Task<IActionResult> GetStages(int orderId, CancellationToken cancellationToken)
+    {
+        var stages = await productionQueryService.Handle(new GetStagesByOrderIdQuery(orderId), cancellationToken);
+        return Ok(StageResourceAssembler.ToResourceListFromStages(stages));
     }
 
     /// <summary>
     ///     Updates the status of a specific production stage.
-    ///     Returns 403 if the requesting user is not the assigned carpenter.
-    ///     Publishes <c>StageUpdatedDomainEvent</c> on success.
     /// </summary>
     [HttpPatch("{stageId:int}")]
     [SwaggerOperation(
@@ -82,35 +78,15 @@ public class ProductionController(
         [FromBody] UpdateStageStatusResource resource,
         CancellationToken cancellationToken)
     {
-        // Parse the status string coming from the request body
         if (!Enum.TryParse<EStageStatus>(resource.Status, ignoreCase: true, out var parsedStatus))
-            return Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                title: "Manufacturing.InvalidStatusValue",
-                detail: $"'{resource.Status}' is not a valid stage status. Allowed values: Pending, InProgress, Completed.",
-                instance: HttpContext.Request.Path);
+            return ManufacturingActionResultAssembler.ToProblemFromError(this,
+                new Error("Manufacturing.InvalidStatusValue",
+                    $"'{resource.Status}' is not a valid stage status. Allowed values: Pending, InProgress, Completed."));
 
         var command = new UpdateStageStatusCommand(orderId, stageId, parsedStatus, resource.RequestingUserId);
         var result = await productionCommandService.Handle(command, cancellationToken);
 
-        if (result.IsFailure)
-        {
-            var statusCode = result.Error.Code switch
-            {
-                var c when c == ManufacturingErrors.ManufactureOrderNotFound.Code => StatusCodes.Status404NotFound,
-                var c when c == ManufacturingErrors.StageNotFound.Code => StatusCodes.Status404NotFound,
-                var c when c == ManufacturingErrors.UnauthorizedStageUpdate.Code => StatusCodes.Status403Forbidden,
-                var c when c == ManufacturingErrors.InvalidStageTransition.Code => StatusCodes.Status409Conflict,
-                _ => StatusCodes.Status400BadRequest
-            };
-
-            return Problem(
-                statusCode: statusCode,
-                title: result.Error.Code,
-                detail: result.Error.Message,
-                instance: HttpContext.Request.Path);
-        }
-
-        return Ok(StageResourceAssembler.ToResourceFromEntity(result.Value));
+        return ManufacturingActionResultAssembler.ToActionResultFromResult(this, result,
+            stage => Ok(StageResourceAssembler.ToResourceFromEntity(stage)));
     }
 }
