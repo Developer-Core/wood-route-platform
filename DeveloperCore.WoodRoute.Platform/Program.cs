@@ -46,6 +46,7 @@ using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Tokens.Jwt.Configurati
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Tokens.Jwt.Services;
 using DeveloperCore.WoodRoute.Platform.Iam.Interfaces.Acl;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Events;
+using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Events;
 using DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Acl;
 using DeveloperCore.WoodRoute.Platform.Shared.Application.Internal.EventHandlers;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Events;
@@ -108,6 +109,7 @@ builder.Services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
 // Domain Event Handlers
 builder.Services.AddScoped<IDomainEventHandler<StageUpdatedEvent>, StageUpdatedEventHandler>();
+builder.Services.AddScoped<IDomainEventHandler<OrderCreatedEvent>, OrderCreatedEventHandler>();
 
 // Sales Bounded Context
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
