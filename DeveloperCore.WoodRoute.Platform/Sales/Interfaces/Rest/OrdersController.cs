@@ -6,6 +6,8 @@ using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest.Transform;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
+using DeveloperCore.WoodRoute.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -20,7 +22,8 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest;
 [SwaggerTag("Available Order Endpoints.")]
 public class OrdersController(
     IOrderCommandService orderCommandService,
-    IOrderQueryService orderQueryService)
+    IOrderQueryService orderQueryService,
+    ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
     [HttpPost]
@@ -32,7 +35,7 @@ public class OrdersController(
         var createOrderCommand = CreateOrderCommandFromResourceAssembler.ToCommandFromResource(resource);
         var result = await orderCommandService.Handle(createOrderCommand, cancellationToken);
 
-        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             createdOrder => CreatedAtAction(nameof(GetOrderById), new { orderId = createdOrder.Id },
                 OrderResourceFromEntityAssembler.ToResourceFromEntity(createdOrder)));
     }
@@ -46,11 +49,9 @@ public class OrdersController(
         CancellationToken cancellationToken)
     {
         if (customerId.HasValue && carpenterId.HasValue)
-            return Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                title: "Sales.InvalidOrderFilter",
-                detail: "Filter orders by either customerId or carpenterId, not both.",
-                instance: HttpContext.Request.Path);
+            return problemDetailsFactory.CreateFromError(this, StatusCodes.Status400BadRequest,
+                new Error("Sales.InvalidOrderFilter",
+                    "Filter orders by either customerId or carpenterId, not both."));
 
         var orders = customerId.HasValue
             ? await orderQueryService.Handle(new GetOrdersByCustomerIdQuery(customerId.Value), cancellationToken)
@@ -72,7 +73,9 @@ public class OrdersController(
         var getOrderByIdQuery = new GetOrderByIdQuery(orderId);
         var order = await orderQueryService.Handle(getOrderByIdQuery, cancellationToken);
 
-        if (order is null) return SalesActionResultAssembler.ToProblemFromError(this, SalesErrors.OrderNotFound);
+        if (order is null)
+            return problemDetailsFactory.CreateFromError(this,
+                SalesActionResultAssembler.ToStatusCode(SalesErrors.OrderNotFound), SalesErrors.OrderNotFound);
         return Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(order));
     }
 
@@ -88,7 +91,7 @@ public class OrdersController(
         var modifyOrderCommand = ModifyOrderCommandFromResourceAssembler.ToCommandFromResource(orderId, resource);
         var result = await orderCommandService.Handle(modifyOrderCommand, cancellationToken);
 
-        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             modifiedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(modifiedOrder)));
     }
 
@@ -101,7 +104,7 @@ public class OrdersController(
     {
         var result = await orderCommandService.Handle(new AcceptOrderCommand(orderId), cancellationToken);
 
-        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             acceptedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(acceptedOrder)));
     }
 
@@ -114,7 +117,7 @@ public class OrdersController(
     {
         var result = await orderCommandService.Handle(new RejectOrderCommand(orderId), cancellationToken);
 
-        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             rejectedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(rejectedOrder)));
     }
 
@@ -127,7 +130,7 @@ public class OrdersController(
     {
         var result = await orderCommandService.Handle(new CancelOrderCommand(orderId), cancellationToken);
 
-        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             cancelledOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(cancelledOrder)));
     }
 
@@ -143,7 +146,7 @@ public class OrdersController(
         var generateQuoteCommand = GenerateQuoteCommandFromResourceAssembler.ToCommandFromResource(orderId, resource);
         var result = await orderCommandService.Handle(generateQuoteCommand, cancellationToken);
 
-        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             quotedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(quotedOrder)));
     }
 
@@ -156,7 +159,7 @@ public class OrdersController(
     {
         var result = await orderCommandService.Handle(new AcceptQuoteCommand(orderId), cancellationToken);
 
-        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             quotedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(quotedOrder)));
     }
 
@@ -174,7 +177,7 @@ public class OrdersController(
             RegisterPaymentCommandFromResourceAssembler.ToCommandFromResource(orderId, resource);
         var result = await orderCommandService.Handle(registerPaymentCommand, cancellationToken);
 
-        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             paidOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(paidOrder)));
     }
 
@@ -191,7 +194,7 @@ public class OrdersController(
             ValidatePaymentCommandFromResourceAssembler.ToCommandFromResource(orderId, paymentId, resource);
         var result = await orderCommandService.Handle(validatePaymentCommand, cancellationToken);
 
-        return SalesActionResultAssembler.ToActionResultFromResult(this, result,
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             validatedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(validatedOrder)));
     }
 }
