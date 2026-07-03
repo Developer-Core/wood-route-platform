@@ -2,7 +2,7 @@ using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Aggregates;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Infrastructure.Persistence.EFC.Configuration;
+namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 
 /// <summary>
 ///     EF Core configuration for the <see cref="ManufactureOrder" /> aggregate root.
