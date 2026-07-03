@@ -1,8 +1,10 @@
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Commands;
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Entities;
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Errors;
+using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Events;
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Entities;
 
 namespace DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Aggregates;
@@ -16,7 +18,7 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Aggregates;
 ///     payments registered for the order. State transitions are guarded and return a
 ///     domain <see cref="Error" /> (<see cref="Error.None" /> on success).
 /// </remarks>
-public class Order : IAuditableEntity
+public class Order : AggregateRoot, IAuditableEntity
 {
     private readonly List<Payment> _payments = [];
 
@@ -39,6 +41,10 @@ public class Order : IAuditableEntity
             command.Material, command.DesignNotes);
         Status = EOrderStatus.Pending;
         PublicTrackingId = Guid.NewGuid();
+        // Raise so the Engagement context creates the tracking conversation seeded with this
+        // tracking id. The int Id is DB-generated and still 0 here, so handlers must correlate
+        // on PublicTrackingId and resolve the real order id once persisted.
+        RaiseDomainEvent(new OrderCreatedEvent(Id, CustomerId, CarpenterId, PublicTrackingId));
     }
 
     public int Id { get; }
