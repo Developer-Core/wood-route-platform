@@ -8,5 +8,11 @@ public interface ISalesContextFacade
     /// <summary>
     ///     Returns whether the order exists and has been accepted by the carpenter.
     /// </summary>
+    /// <param name="orderId">
+    ///     The identifier of the order to check.
+    /// </param>
+    /// <returns>
+    ///     True if the order exists and has been accepted, otherwise false.
+    /// </returns>
     Task<bool> IsOrderAcceptedAsync(int orderId);
 }

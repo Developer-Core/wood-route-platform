@@ -8,6 +8,31 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.ValueObjects;
 /// </remarks>
 public record FurnitureDetails
 {
+    /// <summary>
+    ///     Creates the furniture details for an order.
+    /// </summary>
+    /// <param name="furnitureType">
+    ///     The type of furniture requested.
+    /// </param>
+    /// <param name="width">
+    ///     The width of the furniture piece, in centimeters.
+    /// </param>
+    /// <param name="height">
+    ///     The height of the furniture piece, in centimeters.
+    /// </param>
+    /// <param name="depth">
+    ///     The depth of the furniture piece, in centimeters.
+    /// </param>
+    /// <param name="material">
+    ///     The material requested for the furniture piece.
+    /// </param>
+    /// <param name="designNotes">
+    ///     Additional design notes for the furniture piece.
+    /// </param>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///     Thrown when the <paramref name="width" />, <paramref name="height" /> or <paramref name="depth" /> is not a
+    ///     positive value.
+    /// </exception>
     public FurnitureDetails(string furnitureType, decimal width, decimal height, decimal depth, string material,
         string designNotes)
     {

@@ -8,5 +8,6 @@ namespace DeveloperCore.WoodRoute.Platform.Inventory.Infrastructure.Persistence.
 /// <summary>
 ///     Inventory material repository implementation.
 /// </summary>
+/// <param name="context">The database context</param>
 public class InventoryMaterialRepository(AppDbContext context)
     : BaseRepository<InventoryMaterial>(context), IInventoryMaterialRepository;
