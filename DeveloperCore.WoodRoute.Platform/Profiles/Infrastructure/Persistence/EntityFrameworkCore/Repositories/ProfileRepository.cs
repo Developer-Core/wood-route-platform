@@ -9,6 +9,7 @@ namespace DeveloperCore.WoodRoute.Platform.Profiles.Infrastructure.Persistence.E
 /// <summary>
 ///     Profile repository implementation.
 /// </summary>
+/// <param name="context">The database context</param>
 public class ProfileRepository(AppDbContext context) : BaseRepository<Profile>(context), IProfileRepository
 {
     /// <inheritdoc />

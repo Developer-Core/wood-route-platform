@@ -18,6 +18,18 @@ public static class ProfilesActionResultAssembler
     /// <summary>
     ///     Converts a profile result to the success action result or a problem details response.
     /// </summary>
+    /// <param name="controller">
+    ///     The controller used to build the action result.
+    /// </param>
+    /// <param name="result">
+    ///     The <see cref="Result{T}" /> wrapping the profile outcome to convert.
+    /// </param>
+    /// <param name="successAction">
+    ///     The factory that builds the success action result from the resulting profile.
+    /// </param>
+    /// <returns>
+    ///     The success <see cref="IActionResult" /> when the result is successful; otherwise a problem details response.
+    /// </returns>
     public static IActionResult ToActionResultFromResult(ControllerBase controller, Result<Profile> result,
         Func<Profile, IActionResult> successAction)
     {
@@ -27,6 +39,15 @@ public static class ProfilesActionResultAssembler
     /// <summary>
     ///     Converts a domain error to a problem details response.
     /// </summary>
+    /// <param name="controller">
+    ///     The controller used to build the problem details response.
+    /// </param>
+    /// <param name="error">
+    ///     The domain <see cref="Error" /> to convert.
+    /// </param>
+    /// <returns>
+    ///     An <see cref="IActionResult" /> rendering the error as an RFC 7807 problem details response.
+    /// </returns>
     public static IActionResult ToProblemFromError(ControllerBase controller, Error error)
     {
         return controller.Problem(

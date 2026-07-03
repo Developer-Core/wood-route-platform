@@ -12,6 +12,12 @@ namespace DeveloperCore.WoodRoute.Platform.Profiles.Application.Internal.Command
 /// <summary>
 ///     Profile command service implementation.
 /// </summary>
+/// <param name="profileRepository">
+///     Profile repository.
+/// </param>
+/// <param name="unitOfWork">
+///     Unit of work.
+/// </param>
 public class ProfileCommandService(IProfileRepository profileRepository, IUnitOfWork unitOfWork)
     : IProfileCommandService
 {
