@@ -82,8 +82,21 @@ public class ManufactureOrder : AggregateRoot, IAuditableEntity
         if (error != Error.None) return error;
 
         RaiseDomainEvent(new StageUpdatedEvent(
-            Id, stageId, stage.Name, newStatus.ToString(), updatedByUserId, DateTimeOffset.UtcNow));
+            Id, SalesOrderId, stageId, stage.Name, newStatus.ToString(),
+            CalculateProgressPercent(), updatedByUserId, DateTimeOffset.UtcNow));
 
         return Error.None;
+    }
+
+    /// <summary>
+    ///     Calculates the overall completion of the order as the share of completed stages,
+    ///     expressed as a whole percentage in the range [0, 100].
+    /// </summary>
+    private int CalculateProgressPercent()
+    {
+        if (_stages.Count == 0) return 0;
+
+        var completed = _stages.Count(s => s.Status == EStageStatus.Completed);
+        return (int)Math.Round(completed * 100.0 / _stages.Count, MidpointRounding.AwayFromZero);
     }
 }
