@@ -1,4 +1,4 @@
-namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices.Queries;
+namespace DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Queries;
 
 /// <summary>
 ///     Query to retrieve a paginated list of messages for a specific order conversation.

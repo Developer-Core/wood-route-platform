@@ -1,7 +1,7 @@
 using System.Net.Mime;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices;
-using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices.Queries;
+using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Transform;

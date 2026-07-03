@@ -1,4 +1,4 @@
-using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices.Queries;
+using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Entities;
 
