@@ -136,7 +136,7 @@ public class OrdersController(
 
     [HttpPost("{orderId:int}/quote")]
     [SwaggerOperation("Generate Quote", "Generate the quote for a pending order.", OperationId = "GenerateQuote")]
-    [SwaggerResponse(200, "The quote was generated.", typeof(OrderResource))]
+    [SwaggerResponse(201, "The quote was generated.", typeof(OrderResource))]
     [SwaggerResponse(400, "The quote data is invalid.")]
     [SwaggerResponse(404, "The order was not found.")]
     [SwaggerResponse(409, "The order is not pending or already has a quote.")]
@@ -147,7 +147,8 @@ public class OrdersController(
         var result = await orderCommandService.Handle(generateQuoteCommand, cancellationToken);
 
         return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
-            quotedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(quotedOrder)));
+            quotedOrder => CreatedAtAction(nameof(GetOrderById), new { orderId = quotedOrder.Id },
+                OrderResourceFromEntityAssembler.ToResourceFromEntity(quotedOrder)));
     }
 
     [HttpPatch("{orderId:int}/quote/accept")]
@@ -166,7 +167,7 @@ public class OrdersController(
     [HttpPost("{orderId:int}/payments")]
     [SwaggerOperation("Register Payment", "Register a payment for an order, pending receipt validation.",
         OperationId = "RegisterPayment")]
-    [SwaggerResponse(200, "The payment was registered.", typeof(OrderResource))]
+    [SwaggerResponse(201, "The payment was registered.", typeof(OrderResource))]
     [SwaggerResponse(400, "The payment data is invalid.")]
     [SwaggerResponse(404, "The order was not found.")]
     [SwaggerResponse(409, "The order is not payable.")]
@@ -178,7 +179,8 @@ public class OrdersController(
         var result = await orderCommandService.Handle(registerPaymentCommand, cancellationToken);
 
         return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
-            paidOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(paidOrder)));
+            paidOrder => CreatedAtAction(nameof(GetOrderById), new { orderId = paidOrder.Id },
+                OrderResourceFromEntityAssembler.ToResourceFromEntity(paidOrder)));
     }
 
     [HttpPatch("{orderId:int}/payments/{paymentId:int}/validate")]
