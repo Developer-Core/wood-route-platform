@@ -5,6 +5,7 @@ using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Entities;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Repositories;
+using DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Acl;
 using DeveloperCore.WoodRoute.Platform.Shared.Application.Model;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Repositories;
 
@@ -14,11 +15,17 @@ namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.Comma
 ///     Handles message sending commands for order conversations.
 /// </summary>
 /// <remarks>
-///     If a conversation does not exist yet for the given order, one is automatically created.
-///     This avoids requiring a separate step to open a conversation before sending the first message.
+///     The tracking conversation is normally created at order creation. If none exists yet for the
+///     given order, one is created here seeded with the order's real public tracking id (resolved via
+///     the Sales anti-corruption facade) rather than a fresh, unrelated GUID, so public tracking keeps
+///     working.
 /// </remarks>
 /// <param name="conversationRepository">
 ///     The conversation repository.
+/// </param>
+/// <param name="salesContextFacade">
+///     The Sales anti-corruption facade used to resolve the order's public tracking id when seeding
+///     a fallback conversation.
 /// </param>
 /// <param name="unitOfWork">
 ///     The unit of work.
@@ -28,6 +35,7 @@ namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.Comma
 /// </param>
 public class MessageCommandService(
     IConversationRepository conversationRepository,
+    ISalesContextFacade salesContextFacade,
     IUnitOfWork unitOfWork,
     INotificationService notificationService) : IMessageCommandService
 {
@@ -42,8 +50,13 @@ public class MessageCommandService(
 
         if (conversation is null)
         {
-            // No conversation yet — create one automatically when the first message is sent
-            conversation = new Conversation(command.OrderId);
+            // No conversation yet — create one seeded with the order's real public tracking id so it
+            // resolves the same id the client received. Never seed a fresh, unrelated GUID.
+            var publicTrackingId = await salesContextFacade.GetPublicTrackingIdByOrderIdAsync(command.OrderId);
+            if (publicTrackingId is null)
+                return Result<Message>.Failure(EngagementErrors.ConversationNotFound);
+
+            conversation = new Conversation(command.OrderId, publicTrackingId.Value);
             await conversationRepository.AddAsync(conversation, cancellationToken);
             await unitOfWork.CompleteAsync(cancellationToken);
         }
