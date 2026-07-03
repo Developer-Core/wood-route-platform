@@ -25,12 +25,10 @@ public class RequestAuthorizationMiddleware(RequestDelegate next)
     /// <param name="context">The current HTTP context.</param>
     /// <param name="userQueryService">The user query service used to resolve the authenticated user.</param>
     /// <param name="tokenService">The token service used to validate the JWT bearer token.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
     public async Task InvokeAsync(
         HttpContext context,
         IUserQueryService userQueryService,
-        ITokenService tokenService,
-        CancellationToken cancellationToken)
+        ITokenService tokenService)
     {
         // Skip authorization when the endpoint is decorated with [AllowAnonymous].
         var allowAnonymous = context.GetEndpoint()?.Metadata
@@ -50,7 +48,7 @@ public class RequestAuthorizationMiddleware(RequestDelegate next)
         if (userId is null)
             throw new UnauthorizedAccessException("Invalid authentication token.");
 
-        var user = await userQueryService.Handle(new GetUserByIdQuery(userId.Value), cancellationToken);
+        var user = await userQueryService.Handle(new GetUserByIdQuery(userId.Value), context.RequestAborted);
         if (user is null)
             throw new UnauthorizedAccessException("Invalid authentication token.");
 
