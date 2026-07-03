@@ -4,6 +4,7 @@ using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Transform;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Attributes;
 using DeveloperCore.WoodRoute.Platform.Shared.Interfaces.Rest.ProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -28,6 +29,7 @@ public class TrackingController(
     ///     Returns 404 if the tracking id does not exist.
     /// </summary>
     [HttpGet("{publicTrackingId:guid}")]
+    [AllowAnonymous]
     [SwaggerOperation(
         "Get Order Tracking Status",
         "Returns the current production stage and progress of an order. No authentication required.",
