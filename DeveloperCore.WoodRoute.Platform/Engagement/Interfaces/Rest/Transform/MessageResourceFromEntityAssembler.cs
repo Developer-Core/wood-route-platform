@@ -7,7 +7,7 @@ namespace DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Transform;
 /// <summary>
 ///     Assembler to map between Message entities and REST resources.
 /// </summary>
-public static class MessageResourceAssembler
+public static class MessageResourceFromEntityAssembler
 {
     /// <summary>Builds a <see cref="SendMessageCommand" /> from a REST request resource.</summary>
     public static SendMessageCommand ToCommandFromResource(int orderId, SendMessageResource resource)
