@@ -1,4 +1,5 @@
 using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Inventory.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
@@ -44,6 +45,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         builder.ApplyEngagementConfiguration();
         builder.ApplyManufacturingConfiguration();
         builder.ApplyProfilesConfiguration();
+        builder.ApplyIamConfiguration();
 
         // General Naming Convention for the database objects
         builder.UseSnakeCaseNamingConvention();

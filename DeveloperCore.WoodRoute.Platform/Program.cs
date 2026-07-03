@@ -32,6 +32,19 @@ using DeveloperCore.WoodRoute.Platform.Sales.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Sales.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.EventHandlers;
+using DeveloperCore.WoodRoute.Platform.Iam.Application.Acl;
+using DeveloperCore.WoodRoute.Platform.Iam.Application.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Iam.Application.Internal.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Iam.Application.Internal.OutboundServices;
+using DeveloperCore.WoodRoute.Platform.Iam.Application.Internal.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Iam.Application.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Iam.Domain.Repositories;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Hashing.BCrypt.Services;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Extensions;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Tokens.Jwt.Configuration;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Tokens.Jwt.Services;
+using DeveloperCore.WoodRoute.Platform.Iam.Interfaces.Acl;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Events;
 using DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Acl;
 using DeveloperCore.WoodRoute.Platform.Shared.Application.Internal.EventHandlers;
@@ -83,6 +96,9 @@ builder.Services.AddSwaggerGen(options => options.EnableAnnotations());
 // Internationalisation (i18n)
 builder.Services.AddSharedLocalization();
 
+// Token settings bound from the "TokenSettings" section of appsettings.json
+builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
+
 // Dependency Injection
 
 // Shared Bounded Context
@@ -120,6 +136,14 @@ builder.Services.AddScoped<IManufactureOrderRepository, ManufactureOrderReposito
 builder.Services.AddScoped<IProductionCommandService, ProductionCommandService>();
 builder.Services.AddScoped<IProductionQueryService, ProductionQueryService>();
 
+// Iam Bounded Context
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserCommandService, UserCommandService>();
+builder.Services.AddScoped<IUserQueryService, UserQueryService>();
+builder.Services.AddScoped<IHashingService, HashingService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();
+
 var app = builder.Build();
 
 // Apply pending migrations on startup, creating the database if it doesn't exist
@@ -145,6 +169,11 @@ app.UseHttpsRedirection();
 
 // Apply request localisation (reads Accept-Language / ?culture query string)
 app.UseSharedLocalization();
+
+app.UseRouting();
+
+// Protect all endpoints by default; only [AllowAnonymous] endpoints skip token validation
+app.UseRequestAuthorization();
 
 app.UseAuthorization();
 
