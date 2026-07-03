@@ -24,6 +24,12 @@ public class InventoryMaterial : AggregateRoot, IAuditableEntity
         Unit = string.Empty;
     }
 
+    /// <summary>
+    ///     Creates a new <see cref="InventoryMaterial" /> from a <see cref="CreateInventoryMaterialCommand" />.
+    /// </summary>
+    /// <param name="command">
+    ///     The <see cref="CreateInventoryMaterialCommand" /> containing the material data.
+    /// </param>
     public InventoryMaterial(CreateInventoryMaterialCommand command)
     {
         if (string.IsNullOrWhiteSpace(command.MaterialType))
@@ -53,6 +59,12 @@ public class InventoryMaterial : AggregateRoot, IAuditableEntity
     /// <summary>
     ///     Updates the available quantity and minimum stock of the material.
     /// </summary>
+    /// <param name="command">
+    ///     The <see cref="UpdateInventoryMaterialCommand" /> containing the new stock values.
+    /// </param>
+    /// <returns>
+    ///     A domain <see cref="Error" />, or <see cref="Error.None" /> when the update succeeds.
+    /// </returns>
     public Error Update(UpdateInventoryMaterialCommand command)
     {
         if (command.Quantity <= 0) return InventoryErrors.InvalidQuantity;
