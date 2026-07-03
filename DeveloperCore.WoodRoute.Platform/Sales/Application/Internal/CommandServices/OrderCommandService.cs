@@ -12,6 +12,12 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.CommandSer
 /// <summary>
 ///     Order command service implementation.
 /// </summary>
+/// <param name="orderRepository">
+///     Order repository
+/// </param>
+/// <param name="unitOfWork">
+///     Unit of work
+/// </param>
 public class OrderCommandService(IOrderRepository orderRepository, IUnitOfWork unitOfWork) : IOrderCommandService
 {
     /// <inheritdoc />

@@ -12,6 +12,12 @@ public static class InventoryMaterialResourceFromEntityAssembler
     /// <summary>
     ///     Converts an inventory material aggregate to its resource representation.
     /// </summary>
+    /// <param name="entity">
+    ///     The <see cref="InventoryMaterial" /> aggregate containing the data.
+    /// </param>
+    /// <returns>
+    ///     A new <see cref="InventoryMaterialResource" /> instance.
+    /// </returns>
     public static InventoryMaterialResource ToResourceFromEntity(InventoryMaterial entity)
     {
         return new InventoryMaterialResource(
