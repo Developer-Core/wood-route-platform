@@ -11,6 +11,12 @@ public static class CreateProfileCommandFromResourceAssembler
     /// <summary>
     ///     Converts a create profile resource to its command representation.
     /// </summary>
+    /// <param name="resource">
+    ///     The <see cref="CreateProfileResource" /> containing the data for creating a profile.
+    /// </param>
+    /// <returns>
+    ///     A new <see cref="CreateProfileCommand" /> instance.
+    /// </returns>
     public static CreateProfileCommand ToCommandFromResource(CreateProfileResource resource)
     {
         return new CreateProfileCommand(
