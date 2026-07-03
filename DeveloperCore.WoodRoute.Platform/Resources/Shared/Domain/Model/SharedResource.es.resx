@@ -158,4 +158,15 @@
   <data name="Engagement.TrackingIdNotFound" xml:space="preserve">
     <value>No se encontró ninguna orden con el identificador de seguimiento especificado. Puede ser inválido o la orden puede haber sido cancelada.</value>
   </data>
+
+  <!-- Contexto delimitado de Identidad y Acceso -->
+  <data name="Iam.InvalidCredentials" xml:space="preserve">
+    <value>Correo electrónico o contraseña inválidos.</value>
+  </data>
+  <data name="Iam.EmailAlreadyRegistered" xml:space="preserve">
+    <value>El correo electrónico especificado ya está registrado.</value>
+  </data>
+  <data name="Iam.UserNotFound" xml:space="preserve">
+    <value>El usuario especificado no fue encontrado.</value>
+  </data>
 </root>

@@ -158,4 +158,15 @@
   <data name="Engagement.TrackingIdNotFound" xml:space="preserve">
     <value>No order was found with the specified tracking id. It may be invalid or the order may have been cancelled.</value>
   </data>
+
+  <!-- Iam bounded context -->
+  <data name="Iam.InvalidCredentials" xml:space="preserve">
+    <value>Invalid email or password.</value>
+  </data>
+  <data name="Iam.EmailAlreadyRegistered" xml:space="preserve">
+    <value>The specified email is already registered.</value>
+  </data>
+  <data name="Iam.UserNotFound" xml:space="preserve">
+    <value>The specified user was not found.</value>
+  </data>
 </root>
