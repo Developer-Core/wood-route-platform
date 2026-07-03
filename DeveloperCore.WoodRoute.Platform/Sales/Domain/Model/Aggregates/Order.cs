@@ -25,6 +25,12 @@ public class Order : IAuditableEntity
         Details = null!;
     }
 
+    /// <summary>
+    ///     Creates a new order from the given create order command.
+    /// </summary>
+    /// <param name="command">
+    ///     The <see cref="CreateOrderCommand" /> with the data for creating the order.
+    /// </param>
     public Order(CreateOrderCommand command)
     {
         CustomerId = command.CustomerId;
@@ -88,6 +94,9 @@ public class Order : IAuditableEntity
     /// <summary>
     ///     Modifies the furniture details of the order. Only pending orders can be modified.
     /// </summary>
+    /// <param name="command">
+    ///     The <see cref="ModifyOrderCommand" /> with the new furniture details.
+    /// </param>
     public Error Modify(ModifyOrderCommand command)
     {
         if (Status is not EOrderStatus.Pending) return SalesErrors.OrderNotPending;
@@ -132,6 +141,9 @@ public class Order : IAuditableEntity
     /// <summary>
     ///     Generates the quote for the order. Only pending orders without a quote can be quoted.
     /// </summary>
+    /// <param name="command">
+    ///     The <see cref="GenerateQuoteCommand" /> with the quote data.
+    /// </param>
     public Error GenerateQuote(GenerateQuoteCommand command)
     {
         if (Status is not EOrderStatus.Pending) return SalesErrors.OrderNotPending;
@@ -163,6 +175,9 @@ public class Order : IAuditableEntity
     /// <summary>
     ///     Registers a payment for the order, pending receipt validation.
     /// </summary>
+    /// <param name="command">
+    ///     The <see cref="RegisterPaymentCommand" /> with the payment data.
+    /// </param>
     public Error RegisterPayment(RegisterPaymentCommand command)
     {
         if (Status is not (EOrderStatus.Accepted or EOrderStatus.InProgress or EOrderStatus.ReadyForDelivery))
@@ -177,6 +192,9 @@ public class Order : IAuditableEntity
     /// <summary>
     ///     Confirms a payment of the order after validating its receipt.
     /// </summary>
+    /// <param name="paymentId">
+    ///     The identifier of the payment to confirm.
+    /// </param>
     public Error ConfirmPayment(int paymentId)
     {
         var payment = _payments.FirstOrDefault(payment => payment.Id == paymentId);
@@ -186,6 +204,9 @@ public class Order : IAuditableEntity
     /// <summary>
     ///     Rejects a payment of the order after validating its receipt.
     /// </summary>
+    /// <param name="paymentId">
+    ///     The identifier of the payment to reject.
+    /// </param>
     public Error RejectPayment(int paymentId)
     {
         var payment = _payments.FirstOrDefault(payment => payment.Id == paymentId);

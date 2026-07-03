@@ -8,6 +8,9 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.QueryServi
 /// <summary>
 ///     Order query service implementation.
 /// </summary>
+/// <param name="orderRepository">
+///     Order repository
+/// </param>
 public class OrderQueryService(IOrderRepository orderRepository) : IOrderQueryService
 {
     /// <inheritdoc />

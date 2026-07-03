@@ -11,6 +11,12 @@ public static class OrderResourceFromEntityAssembler
     /// <summary>
     ///     Converts an order aggregate to its resource representation.
     /// </summary>
+    /// <param name="entity">
+    ///     The <see cref="Order" /> aggregate to convert.
+    /// </param>
+    /// <returns>
+    ///     A new <see cref="OrderResource" /> instance.
+    /// </returns>
     public static OrderResource ToResourceFromEntity(Order entity)
     {
         return new OrderResource(

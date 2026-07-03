@@ -9,6 +9,9 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Infrastructure.Persistence.Enti
 /// <summary>
 ///     Order repository implementation.
 /// </summary>
+/// <param name="context">
+///     The database context
+/// </param>
 public class OrderRepository(AppDbContext context) : BaseRepository<Order>(context), IOrderRepository
 {
     /// <inheritdoc />
