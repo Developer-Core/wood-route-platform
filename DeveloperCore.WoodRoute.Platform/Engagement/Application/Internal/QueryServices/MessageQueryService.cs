@@ -9,6 +9,9 @@ namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.Query
 /// <summary>
 ///     Handles read queries for the Engagement bounded context.
 /// </summary>
+/// <param name="conversationRepository">
+///     The conversation repository.
+/// </param>
 public class MessageQueryService(IConversationRepository conversationRepository) : IMessageQueryService
 {
     /// <inheritdoc />

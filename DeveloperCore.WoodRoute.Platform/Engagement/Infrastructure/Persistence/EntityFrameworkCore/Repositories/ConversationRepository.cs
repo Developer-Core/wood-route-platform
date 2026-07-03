@@ -10,6 +10,9 @@ namespace DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence
 /// <summary>
 ///     EF Core implementation of <see cref="IConversationRepository" />.
 /// </summary>
+/// <param name="context">
+///     The database context.
+/// </param>
 public class ConversationRepository(AppDbContext context)
     : BaseRepository<Conversation>(context), IConversationRepository
 {
