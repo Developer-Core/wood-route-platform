@@ -12,6 +12,15 @@ public static class UpdateInventoryMaterialCommandFromResourceAssembler
     /// <summary>
     ///     Converts an update inventory material resource and the target material id to its command representation.
     /// </summary>
+    /// <param name="materialId">
+    ///     The identifier of the material to update.
+    /// </param>
+    /// <param name="resource">
+    ///     The <see cref="UpdateInventoryMaterialResource" /> containing the data.
+    /// </param>
+    /// <returns>
+    ///     A new <see cref="UpdateInventoryMaterialCommand" /> instance.
+    /// </returns>
     public static UpdateInventoryMaterialCommand ToCommandFromResource(int materialId,
         UpdateInventoryMaterialResource resource)
     {
