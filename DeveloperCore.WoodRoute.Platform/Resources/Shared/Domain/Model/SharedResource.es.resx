@@ -55,4 +55,107 @@
   <data name="Config.MissingConnectionString" xml:space="preserve">
     <value>La cadena de conexión 'DefaultConnection' no fue encontrada en la configuración.</value>
   </data>
+
+  <!-- Contexto delimitado de Ventas -->
+  <data name="Sales.OrderNotFound" xml:space="preserve">
+    <value>La orden especificada no fue encontrada.</value>
+  </data>
+  <data name="Sales.OrderNotPending" xml:space="preserve">
+    <value>La operación solo está permitida mientras la orden está pendiente.</value>
+  </data>
+  <data name="Sales.QuoteNotFound" xml:space="preserve">
+    <value>La orden aún no tiene una cotización.</value>
+  </data>
+  <data name="Sales.QuoteAlreadyExists" xml:space="preserve">
+    <value>La orden ya tiene una cotización.</value>
+  </data>
+  <data name="Sales.QuoteAlreadyAccepted" xml:space="preserve">
+    <value>La cotización ya fue aceptada.</value>
+  </data>
+  <data name="Sales.QuoteAlreadyDecided" xml:space="preserve">
+    <value>La cotización ya fue aceptada o rechazada.</value>
+  </data>
+  <data name="Sales.InvalidQuoteCosts" xml:space="preserve">
+    <value>Los costos de la cotización no pueden ser negativos y el total debe ser positivo.</value>
+  </data>
+  <data name="Sales.InvalidQuoteProductionDays" xml:space="preserve">
+    <value>Los días estimados de producción deben ser un valor positivo.</value>
+  </data>
+  <data name="Sales.PaymentNotFound" xml:space="preserve">
+    <value>El pago especificado no fue encontrado en la orden.</value>
+  </data>
+  <data name="Sales.PaymentAlreadyValidated" xml:space="preserve">
+    <value>El comprobante de pago ya fue validado.</value>
+  </data>
+  <data name="Sales.InvalidPaymentAmount" xml:space="preserve">
+    <value>El monto del pago debe ser un valor positivo.</value>
+  </data>
+  <data name="Sales.PaymentReceiptReferenceRequired" xml:space="preserve">
+    <value>Se requiere una referencia de comprobante para registrar un pago.</value>
+  </data>
+  <data name="Sales.OrderNotPayable" xml:space="preserve">
+    <value>Los pagos solo pueden registrarse para órdenes aceptadas o en producción.</value>
+  </data>
+  <data name="Sales.InvalidOrderStatusTransition" xml:space="preserve">
+    <value>La orden no puede pasar de {0} a {1}.</value>
+  </data>
+  <data name="Sales.InvalidOrderFilter" xml:space="preserve">
+    <value>Filtra las órdenes por customerId o por carpenterId, pero no por ambos.</value>
+  </data>
+
+  <!-- Contexto delimitado de Perfiles -->
+  <data name="Profiles.ProfileNotFound" xml:space="preserve">
+    <value>El perfil especificado no fue encontrado.</value>
+  </data>
+  <data name="Profiles.EmailAlreadyRegistered" xml:space="preserve">
+    <value>Ya existe un perfil con la dirección de correo especificada.</value>
+  </data>
+
+  <!-- Contexto delimitado de Inventario -->
+  <data name="Inventory.MaterialNotFound" xml:space="preserve">
+    <value>El material de inventario especificado no fue encontrado.</value>
+  </data>
+  <data name="Inventory.InvalidQuantity" xml:space="preserve">
+    <value>La cantidad debe ser mayor que cero.</value>
+  </data>
+  <data name="Inventory.InvalidMinimumStock" xml:space="preserve">
+    <value>El stock mínimo debe ser mayor o igual que cero.</value>
+  </data>
+
+  <!-- Contexto delimitado de Fabricación -->
+  <data name="Manufacturing.ManufactureOrderNotFound" xml:space="preserve">
+    <value>No se encontró una orden de fabricación para la orden de venta especificada.</value>
+  </data>
+  <data name="Manufacturing.StagesAlreadyDefined" xml:space="preserve">
+    <value>Las etapas de producción de esta orden ya fueron definidas y no pueden modificarse.</value>
+  </data>
+  <data name="Manufacturing.StageNotFound" xml:space="preserve">
+    <value>La etapa especificada no fue encontrada en esta orden de fabricación.</value>
+  </data>
+  <data name="Manufacturing.InvalidStageTransition" xml:space="preserve">
+    <value>El estado de la etapa solo puede avanzar: Pending -&gt; InProgress -&gt; Completed.</value>
+  </data>
+  <data name="Manufacturing.OrderNotAccepted" xml:space="preserve">
+    <value>Las etapas de producción solo pueden definirse para órdenes que hayan sido aceptadas por el carpintero.</value>
+  </data>
+  <data name="Manufacturing.UnauthorizedStageUpdate" xml:space="preserve">
+    <value>Solo el carpintero asignado a esta orden puede actualizar sus etapas de producción.</value>
+  </data>
+  <data name="Manufacturing.EmptyStageList" xml:space="preserve">
+    <value>Debe definirse al menos una etapa de producción.</value>
+  </data>
+  <data name="Manufacturing.InvalidStatusValue" xml:space="preserve">
+    <value>'{0}' no es un estado de etapa válido. Valores permitidos: Pending, InProgress, Completed.</value>
+  </data>
+
+  <!-- Contexto delimitado de Interacción -->
+  <data name="Engagement.ConversationNotFound" xml:space="preserve">
+    <value>No se encontró una conversación para la orden especificada.</value>
+  </data>
+  <data name="Engagement.MessageContentEmpty" xml:space="preserve">
+    <value>El contenido del mensaje no puede estar vacío.</value>
+  </data>
+  <data name="Engagement.TrackingIdNotFound" xml:space="preserve">
+    <value>No se encontró ninguna orden con el identificador de seguimiento especificado. Puede ser inválido o la orden puede haber sido cancelada.</value>
+  </data>
 </root>
