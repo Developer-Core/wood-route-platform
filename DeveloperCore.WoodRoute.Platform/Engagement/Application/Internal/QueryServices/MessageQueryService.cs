@@ -1,4 +1,5 @@
-using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices.Queries;
+using DeveloperCore.WoodRoute.Platform.Engagement.Application.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Entities;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Repositories;
@@ -8,6 +9,9 @@ namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.Query
 /// <summary>
 ///     Handles read queries for the Engagement bounded context.
 /// </summary>
+/// <param name="conversationRepository">
+///     The conversation repository.
+/// </param>
 public class MessageQueryService(IConversationRepository conversationRepository) : IMessageQueryService
 {
     /// <inheritdoc />

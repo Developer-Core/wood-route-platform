@@ -1,4 +1,4 @@
-namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.CommandServices.Commands;
+namespace DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Commands;
 
 /// <summary>
 ///     Command to send a new message in the conversation linked to a specific order.

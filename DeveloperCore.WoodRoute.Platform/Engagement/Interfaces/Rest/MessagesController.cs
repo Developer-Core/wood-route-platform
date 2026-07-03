@@ -1,7 +1,7 @@
 using System.Net.Mime;
-using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.CommandServices;
-using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices;
-using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices.Queries;
+using DeveloperCore.WoodRoute.Platform.Engagement.Application.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Engagement.Application.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Engagement.Interfaces.Rest.Transform;
@@ -38,7 +38,7 @@ public class MessagesController(
     public async Task<IActionResult> SendMessage(int orderId, [FromBody] SendMessageResource resource,
         CancellationToken cancellationToken)
     {
-        var command = MessageResourceAssembler.ToCommandFromResource(orderId, resource);
+        var command = MessageResourceFromEntityAssembler.ToCommandFromResource(orderId, resource);
         var result = await messageCommandService.Handle(command, cancellationToken);
 
         if (result.IsFailure)
@@ -54,7 +54,7 @@ public class MessagesController(
                 instance: HttpContext.Request.Path);
         }
 
-        var messageResource = MessageResourceAssembler.ToResourceFromEntity(result.Value);
+        var messageResource = MessageResourceFromEntityAssembler.ToResourceFromEntity(result.Value);
         return CreatedAtAction(nameof(SendMessage), new { orderId }, messageResource);
     }
 
@@ -77,7 +77,7 @@ public class MessagesController(
     {
         var query = new GetMessagesQuery(orderId, limit, before);
         var messages = await messageQueryService.Handle(query, cancellationToken);
-        var resources = messages.Select(MessageResourceAssembler.ToResourceFromEntity);
+        var resources = messages.Select(MessageResourceFromEntityAssembler.ToResourceFromEntity);
         return Ok(resources);
     }
 }
