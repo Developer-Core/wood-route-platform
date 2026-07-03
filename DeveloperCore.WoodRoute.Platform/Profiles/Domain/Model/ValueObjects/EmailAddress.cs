@@ -5,6 +5,13 @@ namespace DeveloperCore.WoodRoute.Platform.Profiles.Domain.Model.ValueObjects;
 /// </summary>
 public record EmailAddress
 {
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="EmailAddress" /> value object.
+    /// </summary>
+    /// <param name="address">
+    ///     The email address. Must be a non-empty value containing an '@' character.
+    /// </param>
+    /// <exception cref="ArgumentException">Thrown if the input <paramref name="address" /> is not a valid email address.</exception>
     public EmailAddress(string address)
     {
         if (string.IsNullOrWhiteSpace(address) || !address.Contains('@'))

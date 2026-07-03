@@ -8,6 +8,9 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Application.Acl;
 /// <summary>
 ///     Anti-corruption facade over the Sales bounded context.
 /// </summary>
+/// <param name="orderQueryService">
+///     Order query service
+/// </param>
 public class SalesContextFacade(IOrderQueryService orderQueryService) : ISalesContextFacade
 {
     /// <inheritdoc />

@@ -8,6 +8,9 @@ namespace DeveloperCore.WoodRoute.Platform.Profiles.Application.Internal.QuerySe
 /// <summary>
 ///     Profile query service implementation.
 /// </summary>
+/// <param name="profileRepository">
+///     Profile repository.
+/// </param>
 public class ProfileQueryService(IProfileRepository profileRepository) : IProfileQueryService
 {
     /// <inheritdoc />

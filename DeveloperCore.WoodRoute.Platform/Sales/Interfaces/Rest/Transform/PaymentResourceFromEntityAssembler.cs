@@ -11,6 +11,12 @@ public static class PaymentResourceFromEntityAssembler
     /// <summary>
     ///     Converts a payment entity to its resource representation.
     /// </summary>
+    /// <param name="entity">
+    ///     The <see cref="Payment" /> entity to convert.
+    /// </param>
+    /// <returns>
+    ///     A new <see cref="PaymentResource" /> instance.
+    /// </returns>
     public static PaymentResource ToResourceFromEntity(Payment entity)
     {
         return new PaymentResource(

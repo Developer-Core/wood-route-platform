@@ -11,6 +11,12 @@ public static class CreateOrderCommandFromResourceAssembler
     /// <summary>
     ///     Converts a create order resource to its command representation.
     /// </summary>
+    /// <param name="resource">
+    ///     The <see cref="CreateOrderResource" /> containing the data for creating an order.
+    /// </param>
+    /// <returns>
+    ///     A new <see cref="CreateOrderCommand" /> instance.
+    /// </returns>
     public static CreateOrderCommand ToCommandFromResource(CreateOrderResource resource)
     {
         return new CreateOrderCommand(

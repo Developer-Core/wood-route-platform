@@ -8,6 +8,9 @@ namespace DeveloperCore.WoodRoute.Platform.Inventory.Application.Internal.QueryS
 /// <summary>
 ///     Inventory material query service implementation.
 /// </summary>
+/// <param name="inventoryMaterialRepository">
+///     Inventory material repository
+/// </param>
 public class InventoryMaterialQueryService(IInventoryMaterialRepository inventoryMaterialRepository)
     : IInventoryMaterialQueryService
 {

@@ -18,6 +18,18 @@ public static class InventoryActionResultAssembler
     /// <summary>
     ///     Converts an inventory material result to the success action result or a problem details response.
     /// </summary>
+    /// <param name="controller">
+    ///     The <see cref="ControllerBase" /> used to build the response.
+    /// </param>
+    /// <param name="result">
+    ///     The <see cref="Result{InventoryMaterial}" /> to convert.
+    /// </param>
+    /// <param name="successAction">
+    ///     The action that produces the success <see cref="IActionResult" /> from the material.
+    /// </param>
+    /// <returns>
+    ///     The success <see cref="IActionResult" /> when the result succeeds; otherwise a problem details response.
+    /// </returns>
     public static IActionResult ToActionResultFromResult(ControllerBase controller, Result<InventoryMaterial> result,
         Func<InventoryMaterial, IActionResult> successAction)
     {
@@ -27,6 +39,15 @@ public static class InventoryActionResultAssembler
     /// <summary>
     ///     Converts a domain error to a problem details response.
     /// </summary>
+    /// <param name="controller">
+    ///     The <see cref="ControllerBase" /> used to build the response.
+    /// </param>
+    /// <param name="error">
+    ///     The domain <see cref="Error" /> to convert.
+    /// </param>
+    /// <returns>
+    ///     A problem details <see cref="IActionResult" /> representing the error.
+    /// </returns>
     public static IActionResult ToProblemFromError(ControllerBase controller, Error error)
     {
         return controller.Problem(

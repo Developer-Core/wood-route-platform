@@ -12,6 +12,12 @@ namespace DeveloperCore.WoodRoute.Platform.Inventory.Application.Internal.Comman
 /// <summary>
 ///     Inventory material command service implementation.
 /// </summary>
+/// <param name="inventoryMaterialRepository">
+///     Inventory material repository
+/// </param>
+/// <param name="unitOfWork">
+///     Unit of work
+/// </param>
 public class InventoryMaterialCommandService(
     IInventoryMaterialRepository inventoryMaterialRepository,
     IUnitOfWork unitOfWork) : IInventoryMaterialCommandService
