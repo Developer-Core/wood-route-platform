@@ -2,7 +2,7 @@ using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Commands;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Entities;
 using DeveloperCore.WoodRoute.Platform.Shared.Application.Model;
 
-namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.CommandServices;
+namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.CommandServices;
 
 /// <summary>
 ///     Contract for the message command service.

@@ -2,7 +2,7 @@ using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Entities;
 
-namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices;
+namespace DeveloperCore.WoodRoute.Platform.Engagement.Application.QueryServices;
 
 /// <summary>
 ///     Contract for the message query service.
