@@ -1,4 +1,4 @@
-using DeveloperCore.WoodRoute.Platform.Shared.Domain.Events;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Events;
 
 namespace DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Aggregates;
 
@@ -11,7 +11,7 @@ namespace DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Aggregates;
 ///     and is the only member of the aggregate that outside objects may hold references to.
 ///     <para>
 ///         Domain events raised during business logic execution are collected here and
-///         should be dispatched by the infrastructure layer (e.g., after
+///         dispatched by the infrastructure layer (the unit of work, after
 ///         <c>SaveChangesAsync</c>) rather than dispatched inline.
 ///     </para>
 ///     Example:
@@ -21,25 +21,25 @@ namespace DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Aggregates;
 ///         public void Place()
 ///         {
 ///             // business logic ...
-///             RaiseDomainEvent(new OrderPlacedDomainEvent(Id, DateTimeOffset.UtcNow));
+///             RaiseDomainEvent(new OrderPlacedEvent(Id, DateTimeOffset.UtcNow));
 ///         }
 ///     }
 ///     </code>
 /// </remarks>
 public abstract class AggregateRoot
 {
-    private readonly List<IDomainEvent> _domainEvents = [];
+    private readonly List<IEvent> _domainEvents = [];
 
     /// <summary>
     ///     Gets the read-only collection of domain events raised by this aggregate root.
     /// </summary>
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+    public IReadOnlyCollection<IEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     /// <summary>
     ///     Raises a domain event and queues it for dispatching.
     /// </summary>
     /// <param name="domainEvent">The domain event to raise.</param>
-    protected void RaiseDomainEvent(IDomainEvent domainEvent)
+    protected void RaiseDomainEvent(IEvent domainEvent)
     {
         _domainEvents.Add(domainEvent);
     }

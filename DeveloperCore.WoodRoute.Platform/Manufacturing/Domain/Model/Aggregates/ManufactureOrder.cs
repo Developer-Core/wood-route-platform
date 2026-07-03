@@ -3,17 +3,16 @@ using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Events;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Entities;
-using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Events;
 
 namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Aggregates;
 
 /// <summary>
 ///     Aggregate root for the manufacturing process of a sales order.
 /// </summary>
-public class ManufactureOrder : IAuditableEntity
+public class ManufactureOrder : AggregateRoot, IAuditableEntity
 {
-    private readonly List<IEvent> _domainEvents = [];
     private readonly List<Stage> _stages = [];
 
     private ManufactureOrder()
@@ -45,11 +44,6 @@ public class ManufactureOrder : IAuditableEntity
     public bool StagesAreDefined { get; private set; }
 
     public IReadOnlyCollection<Stage> Stages => _stages.AsReadOnly();
-
-    /// <summary>
-    ///     Domain events raised by the aggregate, awaiting dispatch by the infrastructure layer.
-    /// </summary>
-    public IReadOnlyCollection<IEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     // IAuditableEntity
     public DateTimeOffset? CreatedAt { get; set; }
@@ -88,21 +82,21 @@ public class ManufactureOrder : IAuditableEntity
         if (error != Error.None) return error;
 
         RaiseDomainEvent(new StageUpdatedEvent(
-            Id, stageId, stage.Name, newStatus.ToString(), updatedByUserId, DateTimeOffset.UtcNow));
+            Id, SalesOrderId, stageId, stage.Name, newStatus.ToString(),
+            CalculateProgressPercent(), updatedByUserId, DateTimeOffset.UtcNow));
 
         return Error.None;
     }
 
     /// <summary>
-    ///     Clears the collected domain events once they have been dispatched.
+    ///     Calculates the overall completion of the order as the share of completed stages,
+    ///     expressed as a whole percentage in the range [0, 100].
     /// </summary>
-    public void ClearDomainEvents()
+    private int CalculateProgressPercent()
     {
-        _domainEvents.Clear();
-    }
+        if (_stages.Count == 0) return 0;
 
-    private void RaiseDomainEvent(IEvent domainEvent)
-    {
-        _domainEvents.Add(domainEvent);
+        var completed = _stages.Count(s => s.Status == EStageStatus.Completed);
+        return (int)Math.Round(completed * 100.0 / _stages.Count, MidpointRounding.AwayFromZero);
     }
 }

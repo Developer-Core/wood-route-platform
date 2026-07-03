@@ -1,4 +1,4 @@
-using DeveloperCore.WoodRoute.Platform.Shared.Domain.Events;
+using DeveloperCore.WoodRoute.Platform.Shared.Domain.Model.Events;
 
 namespace DeveloperCore.WoodRoute.Platform.Engagement.Domain.Events;
 
@@ -17,4 +17,4 @@ public record MessageSentDomainEvent(
     string SenderType,
     int SenderId,
     DateTimeOffset OccurredOn
-) : IDomainEvent;
+) : IEvent;
