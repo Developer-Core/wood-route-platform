@@ -1,0 +1,384 @@
+####################################################################################
+# WoodRoute Platform - API Smoke Test Suite (.http)
+#
+# Runnable in VS Code REST Client / JetBrains Rider HTTP Client.
+# Base path: /api/v1  |  Kebab-case + lowercase URLs are enabled.
+#
+# Enums serialize as INT in request bodies:
+#   EUserRole   -> Carpenter=0, Client=1
+#   EPaymentType-> Deposit=0, FinalPayment=1
+#
+# Auth: every endpoint is protected by RequestAuthorizationMiddleware EXCEPT
+#   [AllowAnonymous] ones (auth/register, auth/login, tracking/{guid}).
+#   Send: Authorization: Bearer {{token}}
+#
+# Run the requests top-to-bottom: later requests reuse variables captured
+# from earlier named responses (# @name ...).
+####################################################################################
+
+@baseUrl = http://localhost:5008/api/v1
+@carpenterEmail = carpenter+http@wr.com
+@clientEmail = client+http@wr.com
+@password = Passw0rd!
+
+############################  IAM / AUTH  ###########################################
+
+### Register carpenter -> 201 Created (captures token + id)
+# @name registerCarpenter
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "email": "{{carpenterEmail}}", "password": "{{password}}", "role": 0 }
+
+### Register client -> 201 Created
+# @name registerClient
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "email": "{{clientEmail}}", "password": "{{password}}", "role": 1 }
+
+### Capture tokens/ids from the two registrations
+@token = {{registerCarpenter.response.body.token}}
+@carpenterId = {{registerCarpenter.response.body.id}}
+@clientId = {{registerClient.response.body.id}}
+
+### Register duplicate email -> 409 Conflict
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "email": "{{carpenterEmail}}", "password": "{{password}}", "role": 0 }
+
+### Register malformed body (broken JSON) -> 400 Bad Request
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "email": "broken@wr.com", "password": }
+
+### Login valid -> 200 OK (+ token)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{carpenterEmail}}", "password": "{{password}}" }
+
+### Login wrong password -> 401 Unauthorized
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{carpenterEmail}}", "password": "wrong-password" }
+
+### Login unknown email -> 401 Unauthorized
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "nobody@wr.com", "password": "{{password}}" }
+
+### i18n - duplicate register in SPANISH -> 409, detail in Spanish
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+Accept-Language: es
+
+{ "email": "{{carpenterEmail}}", "password": "{{password}}", "role": 0 }
+
+### i18n - duplicate register in ENGLISH -> 409, detail in English (must differ from ES)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+Accept-Language: en
+
+{ "email": "{{carpenterEmail}}", "password": "{{password}}", "role": 0 }
+
+##########################  AUTH ENFORCEMENT  ######################################
+
+### Protected endpoint WITHOUT token -> 401 Unauthorized
+GET {{baseUrl}}/orders
+
+### Protected endpoint with GARBAGE token -> 401 Unauthorized
+GET {{baseUrl}}/orders
+Authorization: Bearer not-a-real-token
+
+### Protected endpoint with VALID token -> 200 OK
+GET {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+
+##############################  SALES / ORDERS  ####################################
+
+### Create order A -> 201 Created (captures id + publicTrackingId)
+# @name orderA
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "customerId": {{clientId}}, "carpenterId": {{carpenterId}}, "furnitureType": "Table",
+  "width": 120, "height": 75, "depth": 60, "material": "Oak", "designNotes": "Rustic finish" }
+
+### Capture order A
+@orderAId = {{orderA.response.body.id}}
+@orderATrackingId = {{orderA.response.body.publicTrackingId}}
+
+### Get order A by id -> 200 OK
+GET {{baseUrl}}/orders/{{orderAId}}
+Authorization: Bearer {{token}}
+
+### Get nonexistent order -> 404 Not Found
+GET {{baseUrl}}/orders/999999
+Authorization: Bearer {{token}}
+
+### Create order with invalid furniture (negative width) -> 400 Bad Request
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "customerId": {{clientId}}, "carpenterId": {{carpenterId}}, "furnitureType": "Chair",
+  "width": -10, "height": 90, "depth": 45, "material": "Pine", "designNotes": "bad" }
+
+### List all orders -> 200 OK
+GET {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+
+### List with BOTH customerId & carpenterId filters -> 400 Bad Request
+GET {{baseUrl}}/orders?customerId={{clientId}}&carpenterId={{carpenterId}}
+Authorization: Bearer {{token}}
+
+### Accept order A -> 200 OK
+PATCH {{baseUrl}}/orders/{{orderAId}}/accept
+Authorization: Bearer {{token}}
+
+### Accept order A again -> 409 Conflict (not pending)
+PATCH {{baseUrl}}/orders/{{orderAId}}/accept
+Authorization: Bearer {{token}}
+
+### Cancel order A (already accepted) -> 409 Conflict (cancel only while pending)
+PATCH {{baseUrl}}/orders/{{orderAId}}/cancel
+Authorization: Bearer {{token}}
+
+### Create order C (for reject) -> 201 Created
+# @name orderC
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "customerId": {{clientId}}, "carpenterId": {{carpenterId}}, "furnitureType": "Shelf",
+  "width": 200, "height": 180, "depth": 30, "material": "Walnut", "designNotes": "Wall unit" }
+
+@orderCId = {{orderC.response.body.id}}
+
+### Reject a pending order (order C) -> 200 OK
+PATCH {{baseUrl}}/orders/{{orderCId}}/reject
+Authorization: Bearer {{token}}
+
+### Create order B (for quote flow) -> 201 Created
+# @name orderB
+POST {{baseUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "customerId": {{clientId}}, "carpenterId": {{carpenterId}}, "furnitureType": "Desk",
+  "width": 140, "height": 78, "depth": 70, "material": "Maple", "designNotes": "Standing desk" }
+
+@orderBId = {{orderB.response.body.id}}
+
+### Generate quote on pending order B -> 201 Created (controller returns CreatedAtAction)
+POST {{baseUrl}}/orders/{{orderBId}}/quote
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "materialsCost": 300.0, "laborCost": 200.0, "estimatedProductionDays": 14 }
+
+### Accept the quote on order B -> 200 OK
+PATCH {{baseUrl}}/orders/{{orderBId}}/quote/accept
+Authorization: Bearer {{token}}
+
+### Register a payment on accepted order A -> 201 Created (controller returns CreatedAtAction)
+# @name paymentA
+POST {{baseUrl}}/orders/{{orderAId}}/payments
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "type": 0, "amount": 150.0, "receiptReference": "RCPT-001" }
+
+### Capture payment id (first payment in the returned order)
+@paymentAId = {{paymentA.response.body.payments.0.id}}
+
+### Validate the payment (approve) -> 200 OK
+PATCH {{baseUrl}}/orders/{{orderAId}}/payments/{{paymentAId}}/validate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "isApproved": true }
+
+### Validate the same payment again -> 409 Conflict (already validated)
+PATCH {{baseUrl}}/orders/{{orderAId}}/payments/{{paymentAId}}/validate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "isApproved": true }
+
+################################  INVENTORY  #######################################
+
+### Create material -> 201 Created
+# @name material
+POST {{baseUrl}}/inventory
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "materialType": "Oak Plank", "quantity": 100, "unit": "units", "minStock": 10 }
+
+@materialId = {{material.response.body.id}}
+
+### Create material with negative quantity -> 400 Bad Request
+POST {{baseUrl}}/inventory
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "materialType": "Bad", "quantity": -5, "unit": "units", "minStock": 1 }
+
+### Get material by id -> 200 OK
+GET {{baseUrl}}/inventory/{{materialId}}
+Authorization: Bearer {{token}}
+
+### Get nonexistent material -> 404 Not Found
+GET {{baseUrl}}/inventory/999999
+Authorization: Bearer {{token}}
+
+### Update material -> 200 OK
+PATCH {{baseUrl}}/inventory/{{materialId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "quantity": 80, "minStock": 15 }
+
+### Update nonexistent material -> 404 Not Found
+PATCH {{baseUrl}}/inventory/999999
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "quantity": 80, "minStock": 15 }
+
+################################  PROFILES  ########################################
+
+### Create profile -> 201 Created
+# @name profile
+POST {{baseUrl}}/profiles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "firstName": "Ada", "lastName": "Lovelace", "email": "ada+http@wr.com" }
+
+@profileId = {{profile.response.body.id}}
+
+### Create profile with invalid email (no @) -> 400 Bad Request
+POST {{baseUrl}}/profiles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "firstName": "Bad", "lastName": "Email", "email": "not-an-email" }
+
+### Get profile by id -> 200 OK
+GET {{baseUrl}}/profiles/{{profileId}}
+Authorization: Bearer {{token}}
+
+### Get nonexistent profile -> 404 Not Found
+GET {{baseUrl}}/profiles/999999
+Authorization: Bearer {{token}}
+
+### Update profile -> 200 OK
+PATCH {{baseUrl}}/profiles/{{profileId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "firstName": "Ada", "lastName": "Byron", "email": "ada+http@wr.com" }
+
+### Update nonexistent profile -> 404 Not Found
+PATCH {{baseUrl}}/profiles/999999
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "firstName": "No", "lastName": "One", "email": "no+http@wr.com" }
+
+#############################  MANUFACTURING  ######################################
+
+### Define stages on ACCEPTED order A -> 201 Created (captures stage ids)
+# @name stages
+POST {{baseUrl}}/orders/{{orderAId}}/stages
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "carpenterId": {{carpenterId}}, "stages": [
+    { "name": "Cutting", "estimatedTimeInDays": 2 },
+    { "name": "Assembly", "estimatedTimeInDays": 3 },
+    { "name": "Finishing", "estimatedTimeInDays": 1 } ] }
+
+@stage0Id = {{stages.response.body.0.id}}
+@stage1Id = {{stages.response.body.1.id}}
+
+### Define stages on NON-accepted order B (pending) -> 409 Conflict
+POST {{baseUrl}}/orders/{{orderBId}}/stages
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "carpenterId": {{carpenterId}}, "stages": [ { "name": "Cutting", "estimatedTimeInDays": 2 } ] }
+
+### Get stages of order A -> 200 OK
+GET {{baseUrl}}/orders/{{orderAId}}/stages
+Authorization: Bearer {{token}}
+
+### Update stage 0 status: Pending -> InProgress (valid) -> 200 OK
+PATCH {{baseUrl}}/orders/{{orderAId}}/stages/{{stage0Id}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "status": "InProgress", "requestingUserId": {{carpenterId}} }
+
+### Update stage 1 status: Pending -> Completed (skip/invalid) -> 409 Conflict
+PATCH {{baseUrl}}/orders/{{orderAId}}/stages/{{stage1Id}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "status": "Completed", "requestingUserId": {{carpenterId}} }
+
+### Update stage with wrong carpenter (requestingUserId != assigned) -> 403 Forbidden
+PATCH {{baseUrl}}/orders/{{orderAId}}/stages/{{stage0Id}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "status": "Completed", "requestingUserId": 999999 }
+
+### Update NONEXISTENT stage -> 404 Not Found
+PATCH {{baseUrl}}/orders/{{orderAId}}/stages/999999
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "status": "InProgress", "requestingUserId": {{carpenterId}} }
+
+##############################  ENGAGEMENT  ########################################
+
+### Send a message on order A -> 201 Created (lazily creates the conversation)
+# @name message
+POST {{baseUrl}}/orders/{{orderAId}}/messages
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "content": "When will my table be ready?", "senderType": "Client", "senderId": {{clientId}} }
+
+### Get message history of order A -> 200 OK
+GET {{baseUrl}}/orders/{{orderAId}}/messages
+Authorization: Bearer {{token}}
+
+### Public tracking with the ORDER's publicTrackingId, NO token (AllowAnonymous) -> 200 OK
+# Since the 0.12.2 fix the Conversation reuses the Order's publicTrackingId (they are
+# linked), so tracking by orderATrackingId resolves correctly and returns 200.
+GET {{baseUrl}}/tracking/{{orderATrackingId}}
+
+### Public tracking with a random GUID -> 404 Not Found
+GET {{baseUrl}}/tracking/11111111-2222-3333-4444-555555555555
+
+### Complete stage 0 (InProgress -> Completed) -> 200 OK (advances tracking progress)
+PATCH {{baseUrl}}/orders/{{orderAId}}/stages/{{stage0Id}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "status": "Completed", "requestingUserId": {{carpenterId}} }
+
+# After this, re-query GET /tracking/{{orderATrackingId}} to confirm CurrentStage/
+# ProgressPercent advanced. Since 0.12.2 the conversation shares the order's tracking id,
+# so no DB lookup is needed — the same public id works.
