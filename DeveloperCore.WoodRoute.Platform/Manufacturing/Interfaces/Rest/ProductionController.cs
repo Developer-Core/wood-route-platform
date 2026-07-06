@@ -1,4 +1,6 @@
 using System.Net.Mime;
+using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.ValueObjects;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Attributes;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Commands;
@@ -16,9 +18,14 @@ namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest;
 /// <summary>
 ///     REST controller for production planning and stage management.
 /// </summary>
+/// <remarks>
+///     Production planning is carpenter-only: every endpoint requires the
+///     <see cref="EUserRole.Carpenter" /> role.
+/// </remarks>
 [ApiController]
 [Route("api/v1/orders/{orderId:int}/stages")]
 [Produces(MediaTypeNames.Application.Json)]
+[Authorize(EUserRole.Carpenter)]
 [SwaggerTag("Available Production Stage Endpoints.")]
 public class ProductionController(
     IProductionCommandService productionCommandService,

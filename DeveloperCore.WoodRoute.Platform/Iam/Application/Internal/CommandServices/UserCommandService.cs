@@ -3,9 +3,12 @@ using DeveloperCore.WoodRoute.Platform.Iam.Application.Internal.OutboundServices
 using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.Commands;
 using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.Errors;
+using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Iam.Domain.Repositories;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Registration.Configuration;
 using DeveloperCore.WoodRoute.Platform.Shared.Application.Model;
 using DeveloperCore.WoodRoute.Platform.Shared.Domain.Repositories;
+using Microsoft.Extensions.Options;
 
 namespace DeveloperCore.WoodRoute.Platform.Iam.Application.Internal.CommandServices;
 
@@ -24,12 +27,18 @@ namespace DeveloperCore.WoodRoute.Platform.Iam.Application.Internal.CommandServi
 /// <param name="unitOfWork">
 ///     Unit of work.
 /// </param>
+/// <param name="carpenterSettings">
+///     Settings carrying the invitation code that gates carpenter registration.
+/// </param>
 public class UserCommandService(
     IUserRepository userRepository,
     IHashingService hashingService,
     ITokenService tokenService,
-    IUnitOfWork unitOfWork) : IUserCommandService
+    IUnitOfWork unitOfWork,
+    IOptions<CarpenterSettings> carpenterSettings) : IUserCommandService
 {
+    private readonly CarpenterSettings _carpenterSettings = carpenterSettings.Value;
+
     /// <inheritdoc />
     public async Task<Result<(User user, string token)>> Handle(SignInCommand command,
         CancellationToken cancellationToken = default)
@@ -56,5 +65,18 @@ public class UserCommandService(
 
         var token = tokenService.GenerateToken(user);
         return Result<(User user, string token)>.Success((user, token));
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<(User user, string token)>> Handle(SignUpCarpenterCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        // Closed carpenter registration: reject any request that does not carry the configured code.
+        if (!string.Equals(command.InvitationCode, _carpenterSettings.InvitationCode, StringComparison.Ordinal))
+            return Result<(User user, string token)>.Failure(IamErrors.InvalidInvitationCode);
+
+        // The role is fixed to Carpenter server-side; the request cannot influence it.
+        var signUpCommand = new SignUpCommand(command.Email, command.Password, EUserRole.Carpenter);
+        return await Handle(signUpCommand, cancellationToken);
     }
 }
