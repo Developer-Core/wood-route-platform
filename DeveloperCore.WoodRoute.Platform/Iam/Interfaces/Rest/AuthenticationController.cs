@@ -43,6 +43,33 @@ public class AuthenticationController(
     }
 
     /// <summary>
+    ///     Registers a new carpenter through the closed, invitation-gated flow and returns the
+    ///     authenticated carpenter together with a JWT token.
+    /// </summary>
+    /// <param name="resource">The <see cref="SignUpCarpenterResource" /> with the registration data.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The authenticated carpenter resource including the JWT token.</returns>
+    [HttpPost("sign-up-carpenter")]
+    [AllowAnonymous]
+    [SwaggerOperation("RegisterCarpenter",
+        "Register a new carpenter using a valid invitation code and issue a JWT token.",
+        OperationId = "RegisterCarpenter")]
+    [SwaggerResponse(201, "The carpenter was registered.", typeof(AuthenticatedUserResource))]
+    [SwaggerResponse(403, "The invitation code is invalid.")]
+    [SwaggerResponse(409, "The email is already registered.")]
+    public async Task<IActionResult> RegisterCarpenter(SignUpCarpenterResource resource,
+        CancellationToken cancellationToken)
+    {
+        var signUpCarpenterCommand = SignUpCarpenterCommandFromResourceAssembler.ToCommandFromResource(resource);
+        var result = await userCommandService.Handle(signUpCarpenterCommand, cancellationToken);
+
+        return IamActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
+            authenticated => StatusCode(StatusCodes.Status201Created,
+                AuthenticatedUserResourceFromEntityAssembler.ToResourceFromEntity(authenticated.user,
+                    authenticated.token)));
+    }
+
+    /// <summary>
     ///     Authenticates a user and returns the authenticated user together with a JWT token (TS01).
     /// </summary>
     /// <param name="resource">The <see cref="SignInResource" /> with the credentials to validate.</param>

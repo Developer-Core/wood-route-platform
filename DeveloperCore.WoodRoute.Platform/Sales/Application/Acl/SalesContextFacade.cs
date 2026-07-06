@@ -21,6 +21,13 @@ public class SalesContextFacade(IOrderQueryService orderQueryService) : ISalesCo
     }
 
     /// <inheritdoc />
+    public async Task<bool> IsOrderParticipantAsync(int orderId, int userId)
+    {
+        var order = await orderQueryService.Handle(new GetOrderByIdQuery(orderId));
+        return order is not null && (order.CustomerId == userId || order.CarpenterId == userId);
+    }
+
+    /// <inheritdoc />
     public async Task<int?> GetOrderIdByPublicTrackingIdAsync(Guid publicTrackingId)
     {
         var order = await orderQueryService.Handle(new GetOrderByPublicTrackingIdQuery(publicTrackingId));

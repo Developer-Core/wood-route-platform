@@ -59,6 +59,7 @@ public static class IamActionResultAssembler
             var code when code == IamErrors.InvalidCredentials.Code => StatusCodes.Status401Unauthorized,
             var code when code == IamErrors.EmailAlreadyRegistered.Code => StatusCodes.Status409Conflict,
             var code when code == IamErrors.UserNotFound.Code => StatusCodes.Status404NotFound,
+            var code when code == IamErrors.InvalidInvitationCode.Code => StatusCodes.Status403Forbidden,
             _ => StatusCodes.Status400BadRequest
         };
     }
