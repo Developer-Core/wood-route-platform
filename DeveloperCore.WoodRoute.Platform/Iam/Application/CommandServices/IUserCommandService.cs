@@ -24,4 +24,14 @@ public interface IUserCommandService
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A result wrapping the created user and its JWT token.</returns>
     Task<Result<(User user, string token)>> Handle(SignUpCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Handles the carpenter sign-up command through the closed, invitation-gated flow,
+    ///     registering a carpenter and issuing a JWT token.
+    /// </summary>
+    /// <param name="command">The <see cref="SignUpCarpenterCommand" /> with the registration data.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A result wrapping the created carpenter and its JWT token.</returns>
+    Task<Result<(User user, string token)>> Handle(SignUpCarpenterCommand command,
+        CancellationToken cancellationToken = default);
 }
