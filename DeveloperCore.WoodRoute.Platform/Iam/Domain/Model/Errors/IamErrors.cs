@@ -15,4 +15,10 @@ public static class IamErrors
 
     public static readonly Error UserNotFound =
         new("Iam.UserNotFound", "The specified user was not found.");
+
+    public static readonly Error InsufficientRole =
+        new("Iam.InsufficientRole", "The current user role is not allowed to perform this action.");
+
+    public static readonly Error InvalidInvitationCode =
+        new("Iam.InvalidInvitationCode", "The provided carpenter invitation code is invalid.");
 }

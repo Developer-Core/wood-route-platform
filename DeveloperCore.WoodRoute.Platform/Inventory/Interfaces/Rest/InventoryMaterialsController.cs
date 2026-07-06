@@ -1,6 +1,8 @@
 using System.Net.Mime;
 using DeveloperCore.WoodRoute.Platform.Inventory.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Inventory.Application.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.ValueObjects;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Attributes;
 using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Errors;
 using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Model.Queries;
 using DeveloperCore.WoodRoute.Platform.Inventory.Interfaces.Rest.Resources;
@@ -14,9 +16,14 @@ namespace DeveloperCore.WoodRoute.Platform.Inventory.Interfaces.Rest;
 /// <summary>
 ///     REST controller for inventory material management.
 /// </summary>
+/// <remarks>
+///     Inventory management is carpenter-only: every endpoint requires the
+///     <see cref="EUserRole.Carpenter" /> role.
+/// </remarks>
 [ApiController]
 [Route("api/v1/inventory")]
 [Produces(MediaTypeNames.Application.Json)]
+[Authorize(EUserRole.Carpenter)]
 [SwaggerTag("Available Inventory Endpoints.")]
 public class InventoryMaterialsController(
     IInventoryMaterialCommandService inventoryMaterialCommandService,

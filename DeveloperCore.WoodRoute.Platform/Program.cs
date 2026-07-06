@@ -42,6 +42,7 @@ using DeveloperCore.WoodRoute.Platform.Iam.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Hashing.BCrypt.Services;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Extensions;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Registration.Configuration;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Tokens.Jwt.Configuration;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Tokens.Jwt.Services;
 using DeveloperCore.WoodRoute.Platform.Iam.Interfaces.Acl;
@@ -136,6 +137,10 @@ builder.Services.AddSharedLocalization();
 
 // Token settings bound from the "TokenSettings" section of appsettings.json
 builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
+
+// Carpenter settings bound from the "Carpenter" section of appsettings.json — gates the closed
+// carpenter registration flow with an invitation code.
+builder.Services.Configure<CarpenterSettings>(builder.Configuration.GetSection("Carpenter"));
 
 // Dependency Injection
 

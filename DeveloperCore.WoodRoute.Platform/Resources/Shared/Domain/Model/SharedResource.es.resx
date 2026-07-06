@@ -169,4 +169,10 @@
   <data name="Iam.UserNotFound" xml:space="preserve">
     <value>El usuario especificado no fue encontrado.</value>
   </data>
+  <data name="Iam.InsufficientRole" xml:space="preserve">
+    <value>El rol del usuario actual no tiene permiso para realizar esta acción.</value>
+  </data>
+  <data name="Iam.InvalidInvitationCode" xml:space="preserve">
+    <value>El código de invitación de carpintero proporcionado es inválido.</value>
+  </data>
 </root>
