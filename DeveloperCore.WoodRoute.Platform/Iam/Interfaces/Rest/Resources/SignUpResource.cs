@@ -1,11 +1,13 @@
-using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.ValueObjects;
-
 namespace DeveloperCore.WoodRoute.Platform.Iam.Interfaces.Rest.Resources;
 
 /// <summary>
-///     Resource carrying the registration data for a sign-up request (TS09).
+///     Resource carrying the registration data for a public sign-up request (TS09).
 /// </summary>
+/// <remarks>
+///     Public registration always creates a <c>Client</c> account. The role is forced
+///     server-side and cannot be chosen by the caller; carpenter accounts are created through
+///     the separate, invitation-gated carpenter sign-up endpoint.
+/// </remarks>
 /// <param name="Email">The email address that will uniquely identify the user.</param>
 /// <param name="Password">The plain text password of the user to register.</param>
-/// <param name="Role">The role chosen at registration.</param>
-public record SignUpResource(string Email, string Password, EUserRole Role);
+public record SignUpResource(string Email, string Password);
