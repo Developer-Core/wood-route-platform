@@ -1,0 +1,48 @@
+# Render Blueprint for the WoodRoute .NET backend.
+databases:
+  - name: wood-route-db
+    databaseName: wood_route_platform
+    user: wood_route
+    plan: free
+    region: oregon
+
+services:
+  - type: web
+    name: wood-route-platform
+    runtime: docker
+    plan: free
+    region: oregon
+    repo: https://github.com/Developer-Core/wood-route-platform
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DB_HOST
+        fromDatabase:
+          name: wood-route-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: wood-route-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: wood-route-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: wood-route-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: wood-route-db
+          property: password
+      # Frontend origin allowed by CORS (Cors:AllowedOrigins[0]).
+      - key: Cors__AllowedOrigins__0
+        value: https://frontend-ashen-one-52.vercel.app
+      # JWT signing secret — generated once by Render and kept stable across deploys.
+      - key: TokenSettings__Secret
+        generateValue: true
