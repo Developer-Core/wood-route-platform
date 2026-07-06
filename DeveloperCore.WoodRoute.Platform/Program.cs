@@ -67,13 +67,28 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()));
 
-// Add Database Connection
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// CORS — origins are read from configuration so each environment declares its own
+// allowed clients (Vite dev server locally, the Vercel domain in production).
+// In production Render injects them via the env var Cors__AllowedOrigins__0=https://<vercel-domain>.
+const string WoodRouteClientsPolicy = "AllowWoodRouteClients";
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(WoodRouteClientsPolicy, policy =>
+        policy.WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 
-if (connectionString == null)
+// Add Database Connection
+var connectionStringTemplate = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(connectionStringTemplate))
 {
     throw new InvalidOperationException("Connection string not found.");
 }
+
+var connectionString = Environment.ExpandEnvironmentVariables(connectionStringTemplate);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -189,12 +204,22 @@ if (app.Environment.IsDevelopment())
 // Global exception handler — must be first in the pipeline
 app.UseGlobalExceptionHandler();
 
-app.UseHttpsRedirection();
+// HTTPS redirection is skipped in Development so browser CORS preflight (OPTIONS) requests
+// are not answered with a 307 to https://localhost:7155 — a redirected preflight fails the
+// whole CORS handshake. In production TLS is terminated at the Render proxy.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 // Apply request localisation (reads Accept-Language / ?culture query string)
 app.UseSharedLocalization();
 
 app.UseRouting();
+
+// CORS must run after routing and before the authorization middleware, otherwise the
+// anonymous preflight OPTIONS request would be rejected by UseRequestAuthorization.
+app.UseCors(WoodRouteClientsPolicy);
 
 // Protect all endpoints by default; only [AllowAnonymous] endpoints skip token validation
 app.UseRequestAuthorization();
