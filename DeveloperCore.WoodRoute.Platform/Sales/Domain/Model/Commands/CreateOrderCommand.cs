@@ -32,7 +32,7 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Commands;
 /// </param>
 public record CreateOrderCommand(
     int CustomerId,
-    int CarpenterId,
+    int? CarpenterId,
     string FurnitureType,
     decimal Width,
     decimal Height,

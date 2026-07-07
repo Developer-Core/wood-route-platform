@@ -11,6 +11,5 @@ public record StageDefinitionResource(string Name, int EstimatedTimeInDays);
 ///     Request body for POST /orders/{orderId}/stages.
 ///     The carpenter sends this to define the production plan for an accepted order.
 /// </summary>
-/// <param name="CarpenterId">Id of the carpenter defining the plan.</param>
 /// <param name="Stages">Ordered list of stages to create.</param>
-public record DefineStagesResource(int CarpenterId, IReadOnlyList<StageDefinitionResource> Stages);
+public record DefineStagesResource(IReadOnlyList<StageDefinitionResource> Stages);

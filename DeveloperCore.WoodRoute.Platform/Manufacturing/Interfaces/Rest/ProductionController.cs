@@ -1,6 +1,7 @@
 using System.Net.Mime;
 using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Attributes;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Extensions;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Commands;
@@ -48,7 +49,13 @@ public class ProductionController(
     public async Task<IActionResult> DefineProductionStages(int orderId, [FromBody] DefineStagesResource resource,
         CancellationToken cancellationToken)
     {
-        var command = StageResourceAssembler.ToCommandFromResource(orderId, resource);
+        // The acting carpenter is derived from the JWT-backed token (never from client input) so the
+        // ownership check in the command service cannot be spoofed via the request body.
+        var user = HttpContext.GetAuthenticatedUser();
+        if (user is null)
+            return Unauthorized();
+
+        var command = StageResourceAssembler.ToCommandFromResource(orderId, user.Id, resource);
         var result = await productionCommandService.Handle(command, cancellationToken);
 
         return ManufacturingActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
@@ -87,6 +94,12 @@ public class ProductionController(
         [FromBody] UpdateStageStatusResource resource,
         CancellationToken cancellationToken)
     {
+        // The acting carpenter is derived from the JWT-backed token (never from client input) so the
+        // ownership check in the command service cannot be spoofed via the request body.
+        var user = HttpContext.GetAuthenticatedUser();
+        if (user is null)
+            return Unauthorized();
+
         if (!Enum.TryParse<EStageStatus>(resource.Status, ignoreCase: true, out var parsedStatus))
         {
             var invalidStatusError = new Error("Manufacturing.InvalidStatusValue",
@@ -96,7 +109,7 @@ public class ProductionController(
                 resource.Status);
         }
 
-        var command = new UpdateStageStatusCommand(orderId, stageId, parsedStatus, resource.RequestingUserId);
+        var command = new UpdateStageStatusCommand(orderId, stageId, parsedStatus, user.Id);
         var result = await productionCommandService.Handle(command, cancellationToken);
 
         return ManufacturingActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,

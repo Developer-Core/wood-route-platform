@@ -20,6 +20,8 @@ public static class ModelBuilderExtensions
         builder.Entity<User>().Property(u => u.Id).IsRequired().ValueGeneratedOnAdd();
         builder.Entity<User>().Property(u => u.Email).HasMaxLength(320).IsRequired();
         builder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+        builder.Entity<User>().Property(u => u.FirstName).HasMaxLength(100).IsRequired();
+        builder.Entity<User>().Property(u => u.LastName).HasMaxLength(100).IsRequired();
         builder.Entity<User>().Property(u => u.PasswordHash).IsRequired();
         builder.Entity<User>().Property(u => u.Role).HasConversion<string>().HasMaxLength(40).IsRequired();
     }

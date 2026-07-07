@@ -1,4 +1,5 @@
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Aggregates;
+using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
@@ -43,6 +44,16 @@ public class OrderRepository(AppDbContext context) : BaseRepository<Order>(conte
             .Include(order => order.Quote)
             .Include(order => order.Payments)
             .Where(order => order.CarpenterId == carpenterId)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<Order>> FindUnassignedAsync(CancellationToken cancellationToken = default)
+    {
+        return await Context.Set<Order>()
+            .Include(order => order.Quote)
+            .Include(order => order.Payments)
+            .Where(order => order.CarpenterId == null && order.Status == EOrderStatus.Pending)
             .ToListAsync(cancellationToken);
     }
 }
