@@ -22,4 +22,9 @@ public interface IOrderRepository : IBaseRepository<Order>
     ///     Find all orders received by a carpenter
     /// </summary>
     Task<IEnumerable<Order>> FindByCarpenterIdAsync(int carpenterId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Find all unassigned, pending orders that make up the pool any carpenter can claim
+    /// </summary>
+    Task<IEnumerable<Order>> FindUnassignedAsync(CancellationToken cancellationToken = default);
 }

@@ -75,6 +75,19 @@ public class OrdersController(
         return Ok(orderResources);
     }
 
+    [HttpGet("pool")]
+    [Authorize(EUserRole.Carpenter)]
+    [SwaggerOperation("Get Order Pool", "Get the unassigned, pending orders any carpenter can claim.",
+        OperationId = "GetOrderPool")]
+    [SwaggerResponse(200, "The pool orders were found and returned.", typeof(IEnumerable<OrderResource>))]
+    [SwaggerResponse(401, "The request is not authenticated.")]
+    public async Task<IActionResult> GetOrderPool(CancellationToken cancellationToken)
+    {
+        var orders = await orderQueryService.Handle(new GetUnassignedOrdersQuery(), cancellationToken);
+        var orderResources = orders.Select(OrderResourceFromEntityAssembler.ToResourceFromEntity);
+        return Ok(orderResources);
+    }
+
     [HttpGet("{orderId:int}")]
     [SwaggerOperation("Get Order by Id", "Get an order by its unique identifier.", OperationId = "GetOrderById")]
     [SwaggerResponse(200, "The order was found and returned.", typeof(OrderResource))]
@@ -147,17 +160,22 @@ public class OrdersController(
     }
 
     [HttpPatch("{orderId:int}/accept")]
-    [SwaggerOperation("Accept Order", "Accept a pending order.", OperationId = "AcceptOrder")]
+    [Authorize(EUserRole.Carpenter)]
+    [SwaggerOperation("Accept Order", "Accept a pending order, claiming it from the pool when unassigned.",
+        OperationId = "AcceptOrder")]
     [SwaggerResponse(200, "The order was accepted.", typeof(OrderResource))]
     [SwaggerResponse(404, "The order was not found.")]
-    [SwaggerResponse(409, "The order is not pending.")]
+    [SwaggerResponse(409, "The order is not pending or is already assigned.")]
     public async Task<IActionResult> AcceptOrder(int orderId, CancellationToken cancellationToken)
     {
-        var accessDenied = await EnsureOrderOwnershipAsync(orderId, cancellationToken);
-        if (accessDenied is not null)
-            return accessDenied;
+        // A carpenter accepts an order to claim it from the pool: the acting identity is derived from
+        // the JWT-backed token (never from client input) and, when the order is still unassigned, the
+        // command assigns it to this carpenter before accepting it.
+        var user = HttpContext.GetAuthenticatedUser();
+        if (user is null)
+            return Unauthorized();
 
-        var result = await orderCommandService.Handle(new AcceptOrderCommand(orderId), cancellationToken);
+        var result = await orderCommandService.Handle(new AcceptOrderCommand(orderId, user.Id), cancellationToken);
 
         return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             acceptedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(acceptedOrder)));
