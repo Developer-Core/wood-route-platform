@@ -11,14 +11,19 @@ namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest.Transfo
 public static class StageResourceAssembler
 {
     /// <summary>Builds a <see cref="DefineStagesCommand" /> from the REST request resource.</summary>
-    public static DefineStagesCommand ToCommandFromResource(int salesOrderId, DefineStagesResource resource)
+    /// <remarks>
+    ///     The carpenter id is taken from the authenticated identity (JWT-backed token) supplied by the
+    ///     controller, never from client input, to prevent authorization spoofing.
+    /// </remarks>
+    public static DefineStagesCommand ToCommandFromResource(int salesOrderId, int carpenterId,
+        DefineStagesResource resource)
     {
         var stages = resource.Stages
             .Select(s => new StageDefinition(s.Name, s.EstimatedTimeInDays))
             .ToList()
             .AsReadOnly();
 
-        return new DefineStagesCommand(salesOrderId, resource.CarpenterId, stages);
+        return new DefineStagesCommand(salesOrderId, carpenterId, stages);
     }
 
     /// <summary>Builds a <see cref="StageResource" /> from a domain <see cref="Stage" /> entity.</summary>

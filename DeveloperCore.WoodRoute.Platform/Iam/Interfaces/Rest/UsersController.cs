@@ -1,6 +1,7 @@
 using System.Net.Mime;
 using DeveloperCore.WoodRoute.Platform.Iam.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.Queries;
+using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Attributes;
 using DeveloperCore.WoodRoute.Platform.Iam.Interfaces.Rest.Resources;
 using DeveloperCore.WoodRoute.Platform.Iam.Interfaces.Rest.Transform;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ namespace DeveloperCore.WoodRoute.Platform.Iam.Interfaces.Rest;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Produces(MediaTypeNames.Application.Json)]
+[Authorize]
 [SwaggerTag("Available User Endpoints.")]
 public class UsersController(IUserQueryService userQueryService) : ControllerBase
 {
