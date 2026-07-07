@@ -1,3 +1,9 @@
+using DeveloperCore.WoodRoute.Platform.Customers.Application.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Customers.Application.Internal.CommandServices;
+using DeveloperCore.WoodRoute.Platform.Customers.Application.Internal.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Customers.Application.QueryServices;
+using DeveloperCore.WoodRoute.Platform.Customers.Domain.Repositories;
+using DeveloperCore.WoodRoute.Platform.Customers.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Engagement.Application.Internal.QueryServices;
@@ -163,6 +169,11 @@ builder.Services.AddScoped<ISalesContextFacade, SalesContextFacade>();
 builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 builder.Services.AddScoped<IProfileCommandService, ProfileCommandService>();
 builder.Services.AddScoped<IProfileQueryService, ProfileQueryService>();
+
+// Customers Bounded Context
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomerCommandService, CustomerCommandService>();
+builder.Services.AddScoped<ICustomerQueryService, CustomerQueryService>();
 
 // Inventory Bounded Context
 builder.Services.AddScoped<IInventoryMaterialRepository, InventoryMaterialRepository>();
