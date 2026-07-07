@@ -64,6 +64,35 @@ public class ProductionController(
     }
 
     /// <summary>
+    ///     Re-defines the production stages of an order while none of them have started yet.
+    /// </summary>
+    [HttpPut]
+    [SwaggerOperation(
+        "Update Stages",
+        "Re-define the ordered production stages of an order while none of them have started.",
+        OperationId = "UpdateProductionStages")]
+    [SwaggerResponse(200, "The stages were updated.", typeof(IEnumerable<StageResource>))]
+    [SwaggerResponse(400, "The stage list is empty or invalid.")]
+    [SwaggerResponse(403, "The requesting user is not the carpenter assigned to this order.")]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "Production has already started, so the stages can no longer be edited.")]
+    public async Task<IActionResult> UpdateProductionStages(int orderId, [FromBody] DefineStagesResource resource,
+        CancellationToken cancellationToken)
+    {
+        // The acting carpenter is derived from the JWT-backed token (never from client input) so the
+        // ownership check in the command service cannot be spoofed via the request body.
+        var user = HttpContext.GetAuthenticatedUser();
+        if (user is null)
+            return Unauthorized();
+
+        var command = StageResourceAssembler.ToUpdateCommandFromResource(orderId, user.Id, resource);
+        var result = await productionCommandService.Handle(command, cancellationToken);
+
+        return ManufacturingActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
+            order => Ok(StageResourceAssembler.ToResourceListFromOrder(order)));
+    }
+
+    /// <summary>
     ///     Returns the production stages of an order for the client progress view.
     /// </summary>
     [HttpGet]

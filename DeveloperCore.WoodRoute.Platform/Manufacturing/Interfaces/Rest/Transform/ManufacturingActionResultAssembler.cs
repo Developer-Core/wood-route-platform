@@ -38,6 +38,7 @@ public static class ManufacturingActionResultAssembler
             var code when code == ManufacturingErrors.UnauthorizedStageUpdate.Code => StatusCodes.Status403Forbidden,
             var code when code == ManufacturingErrors.OrderNotAccepted.Code => StatusCodes.Status409Conflict,
             var code when code == ManufacturingErrors.StagesAlreadyDefined.Code => StatusCodes.Status409Conflict,
+            var code when code == ManufacturingErrors.StagesAlreadyStarted.Code => StatusCodes.Status409Conflict,
             var code when code == ManufacturingErrors.InvalidStageTransition.Code => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status400BadRequest
         };

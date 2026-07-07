@@ -31,4 +31,8 @@ public static class ManufacturingErrors
 
     public static readonly Error EmptyStageList =
         new("Manufacturing.EmptyStageList", "At least one production stage must be defined.");
+
+    public static readonly Error StagesAlreadyStarted =
+        new("Manufacturing.StagesAlreadyStarted",
+            "Stages can no longer be edited because production has already started.");
 }
