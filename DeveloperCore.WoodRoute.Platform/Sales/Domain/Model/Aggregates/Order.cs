@@ -153,6 +153,11 @@ public class Order : AggregateRoot, IAuditableEntity
     {
         if (Status is not EOrderStatus.ReadyForDelivery)
             return SalesErrors.InvalidOrderStatusTransition(Status, EOrderStatus.Completed);
+        // The furniture may be finished, but the order only closes once it is fully paid:
+        // the sum of confirmed payments must cover the quote total.
+        var confirmedPaid = _payments.Where(payment => payment.Status == EPaymentStatus.Confirmed).Sum(payment => payment.Amount);
+        if (Quote is null || confirmedPaid < Quote.Total)
+            return SalesErrors.OrderNotFullyPaid;
         Status = EOrderStatus.Completed;
         return Error.None;
     }
