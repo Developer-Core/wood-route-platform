@@ -23,6 +23,7 @@ public static class AuthenticatedUserResourceFromEntityAssembler
     /// </returns>
     public static AuthenticatedUserResource ToResourceFromEntity(User user, string token)
     {
-        return new AuthenticatedUserResource(user.Id, user.Email, user.Role.ToString(), token);
+        return new AuthenticatedUserResource(user.Id, user.FirstName, user.LastName, user.FullName, user.Email,
+            user.Role.ToString(), token);
     }
 }
