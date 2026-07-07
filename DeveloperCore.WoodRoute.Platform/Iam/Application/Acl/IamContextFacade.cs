@@ -23,7 +23,7 @@ public class IamContextFacade(IUserCommandService userCommandService, IUserQuery
     public async Task<int> CreateUser(string email, string password, EUserRole role,
         CancellationToken cancellationToken = default)
     {
-        var signUpCommand = new SignUpCommand(email, password, role);
+        var signUpCommand = new SignUpCommand(string.Empty, string.Empty, email, password, role);
         var result = await userCommandService.Handle(signUpCommand, cancellationToken);
         return result.IsSuccess ? result.Value.user.Id : 0;
     }
