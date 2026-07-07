@@ -13,7 +13,8 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest.Resources;
 ///     The identifier of the customer who placed the order.
 /// </param>
 /// <param name="CarpenterId">
-///     The identifier of the carpenter who received the order.
+///     The identifier of the carpenter who received the order, or <c>null</c> while the order is
+///     still in the unassigned pool.
 /// </param>
 /// <param name="Status">
 ///     The current status of the order.
@@ -31,7 +32,7 @@ public record OrderResource(
     int Id,
     Guid PublicTrackingId,
     int CustomerId,
-    int CarpenterId,
+    int? CarpenterId,
     string Status,
     FurnitureDetailsResource Details,
     QuoteResource? Quote,

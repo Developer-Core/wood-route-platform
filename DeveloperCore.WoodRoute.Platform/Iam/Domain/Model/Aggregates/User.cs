@@ -19,6 +19,8 @@ public class User : IAuditableEntity
     {
         Email = string.Empty;
         PasswordHash = string.Empty;
+        FirstName = string.Empty;
+        LastName = string.Empty;
     }
 
     /// <summary>
@@ -35,10 +37,19 @@ public class User : IAuditableEntity
         Email = command.Email;
         PasswordHash = passwordHash;
         Role = command.Role;
+        FirstName = command.FirstName;
+        LastName = command.LastName;
     }
 
     public int Id { get; }
     public string Email { get; private set; }
+    public string FirstName { get; private set; }
+    public string LastName { get; private set; }
+
+    /// <summary>
+    ///     Gets the full name of the user, composed from <see cref="FirstName" /> and <see cref="LastName" />.
+    /// </summary>
+    public string FullName => $"{FirstName} {LastName}";
 
     [JsonIgnore] public string PasswordHash { get; private set; }
 

@@ -20,7 +20,7 @@ public static class ModelBuilderExtensions
         builder.Entity<Order>().HasKey(o => o.Id);
         builder.Entity<Order>().Property(o => o.Id).IsRequired().ValueGeneratedOnAdd();
         builder.Entity<Order>().Property(o => o.CustomerId).IsRequired();
-        builder.Entity<Order>().Property(o => o.CarpenterId).IsRequired();
+        builder.Entity<Order>().Property(o => o.CarpenterId);
         builder.Entity<Order>().Property(o => o.Status).HasConversion<string>().HasMaxLength(40).IsRequired();
         builder.Entity<Order>().Property(o => o.PublicTrackingId).IsRequired();
         builder.Entity<Order>().HasIndex(o => o.PublicTrackingId).IsUnique();

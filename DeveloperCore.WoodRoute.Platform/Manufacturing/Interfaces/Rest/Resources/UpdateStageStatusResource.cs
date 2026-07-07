@@ -8,8 +8,4 @@ namespace DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Rest.Resourc
 ///     New status to apply: "Pending", "InProgress" or "Completed".
 ///     Only forward transitions are accepted.
 /// </param>
-/// <param name="RequestingUserId">
-///     Id of the authenticated user making the request.
-///     Must match the carpenter assigned to the order, otherwise 403 is returned.
-/// </param>
-public record UpdateStageStatusResource(string Status, int RequestingUserId);
+public record UpdateStageStatusResource(string Status);
