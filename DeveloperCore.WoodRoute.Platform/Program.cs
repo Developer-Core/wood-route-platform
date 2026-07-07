@@ -26,12 +26,6 @@ using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.QueryS
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
-using DeveloperCore.WoodRoute.Platform.Profiles.Application.CommandServices;
-using DeveloperCore.WoodRoute.Platform.Profiles.Application.Internal.CommandServices;
-using DeveloperCore.WoodRoute.Platform.Profiles.Application.Internal.QueryServices;
-using DeveloperCore.WoodRoute.Platform.Profiles.Application.QueryServices;
-using DeveloperCore.WoodRoute.Platform.Profiles.Domain.Repositories;
-using DeveloperCore.WoodRoute.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.Acl;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.CommandServices;
@@ -166,11 +160,6 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderCommandService, OrderCommandService>();
 builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();
 builder.Services.AddScoped<ISalesContextFacade, SalesContextFacade>();
-
-// Profiles Bounded Context
-builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
-builder.Services.AddScoped<IProfileCommandService, ProfileCommandService>();
-builder.Services.AddScoped<IProfileQueryService, ProfileQueryService>();
 
 // Customers Bounded Context
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
