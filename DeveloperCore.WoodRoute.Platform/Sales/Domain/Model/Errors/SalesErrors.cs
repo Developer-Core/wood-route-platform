@@ -53,6 +53,9 @@ public static class SalesErrors
     public static readonly Error OrderNotPayable =
         new("Sales.OrderNotPayable", "Payments can only be registered for accepted or in-production orders.");
 
+    public static readonly Error OrderNotFullyPaid =
+        new("Sales.OrderNotFullyPaid", "The order can only be completed once it has been fully paid.");
+
     /// <summary>
     ///     Builds an error describing an invalid order status transition.
     /// </summary>

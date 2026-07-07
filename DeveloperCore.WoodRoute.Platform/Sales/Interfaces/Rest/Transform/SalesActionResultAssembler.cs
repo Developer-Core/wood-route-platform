@@ -61,6 +61,9 @@ public static class SalesActionResultAssembler
             var code when code == SalesErrors.QuoteAlreadyAccepted.Code => StatusCodes.Status409Conflict,
             var code when code == SalesErrors.QuoteAlreadyDecided.Code => StatusCodes.Status409Conflict,
             var code when code == SalesErrors.PaymentAlreadyValidated.Code => StatusCodes.Status409Conflict,
+            var code when code == SalesErrors.OrderNotFullyPaid.Code => StatusCodes.Status409Conflict,
+            var code when code == SalesErrors.OrderNotAccepted.Code => StatusCodes.Status409Conflict,
+            var code when code == SalesErrors.OrderAlreadyAssigned.Code => StatusCodes.Status409Conflict,
             "Sales.InvalidOrderStatusTransition" => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status400BadRequest
         };
