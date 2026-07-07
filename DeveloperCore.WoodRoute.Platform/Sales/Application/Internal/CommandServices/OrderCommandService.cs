@@ -65,6 +65,24 @@ public class OrderCommandService(IOrderRepository orderRepository, IUnitOfWork u
     }
 
     /// <inheritdoc />
+    public Task<Result<Order>> Handle(StartProductionCommand command, CancellationToken cancellationToken = default)
+    {
+        return ApplyToOrderAsync(command.OrderId, order => order.MarkInProgress(), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<Result<Order>> Handle(MarkOrderReadyCommand command, CancellationToken cancellationToken = default)
+    {
+        return ApplyToOrderAsync(command.OrderId, order => order.MarkReadyForDelivery(), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<Result<Order>> Handle(CompleteOrderCommand command, CancellationToken cancellationToken = default)
+    {
+        return ApplyToOrderAsync(command.OrderId, order => order.Complete(), cancellationToken);
+    }
+
+    /// <inheritdoc />
     public Task<Result<Order>> Handle(GenerateQuoteCommand command, CancellationToken cancellationToken = default)
     {
         return ApplyToOrderAsync(command.OrderId, order => order.GenerateQuote(command), cancellationToken);
