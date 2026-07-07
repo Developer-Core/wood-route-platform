@@ -16,6 +16,11 @@ public interface IProductionCommandService
     Task<Result<ManufactureOrder>> Handle(DefineStagesCommand command, CancellationToken cancellationToken = default);
 
     /// <summary>
+    ///     Handles the update (re-define) stages command.
+    /// </summary>
+    Task<Result<ManufactureOrder>> Handle(UpdateStagesCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>
     ///     Handles the update stage status command.
     /// </summary>
     Task<Result<Stage>> Handle(UpdateStageStatusCommand command, CancellationToken cancellationToken = default);

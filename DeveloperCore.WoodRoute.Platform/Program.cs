@@ -20,12 +20,14 @@ using DeveloperCore.WoodRoute.Platform.Inventory.Application.Internal.QueryServi
 using DeveloperCore.WoodRoute.Platform.Inventory.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Inventory.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Inventory.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Acl;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.Internal.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Repositories;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Acl;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.Acl;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.Internal.CommandServices;
@@ -182,6 +184,7 @@ builder.Services.AddScoped<INotificationService, NoOpNotificationService>();
 builder.Services.AddScoped<IManufactureOrderRepository, ManufactureOrderRepository>();
 builder.Services.AddScoped<IProductionCommandService, ProductionCommandService>();
 builder.Services.AddScoped<IProductionQueryService, ProductionQueryService>();
+builder.Services.AddScoped<IManufacturingContextFacade, ManufacturingContextFacade>();
 
 // Iam Bounded Context
 builder.Services.AddScoped<IUserRepository, UserRepository>();

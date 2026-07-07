@@ -43,6 +43,28 @@ public class ProductionCommandService(
     }
 
     /// <inheritdoc />
+    public async Task<Result<ManufactureOrder>> Handle(UpdateStagesCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var manufactureOrder =
+            await manufactureOrderRepository.FindBySalesOrderIdAsync(command.SalesOrderId, cancellationToken);
+
+        if (manufactureOrder is null)
+            return Result<ManufactureOrder>.Failure(ManufacturingErrors.ManufactureOrderNotFound);
+
+        if (manufactureOrder.CarpenterId != command.CarpenterId)
+            return Result<ManufactureOrder>.Failure(ManufacturingErrors.UnauthorizedStageUpdate);
+
+        var error = manufactureOrder.RedefineStages(command.Stages.Select(s => (s.Name, s.EstimatedTimeInDays)));
+        if (error != Error.None) return Result<ManufactureOrder>.Failure(error);
+
+        manufactureOrderRepository.Update(manufactureOrder);
+        await unitOfWork.CompleteAsync(cancellationToken);
+
+        return Result<ManufactureOrder>.Success(manufactureOrder);
+    }
+
+    /// <inheritdoc />
     public async Task<Result<Stage>> Handle(UpdateStageStatusCommand command,
         CancellationToken cancellationToken = default)
     {

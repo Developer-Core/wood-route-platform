@@ -28,6 +28,12 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest.Resources;
 /// <param name="Payments">
 ///     The <see cref="PaymentResource" /> collection of the order.
 /// </param>
+/// <param name="CompletedStages">
+///     The number of production stages already completed, or <c>0</c> when no plan exists.
+/// </param>
+/// <param name="TotalStages">
+///     The total number of production stages, or <c>0</c> when no plan exists.
+/// </param>
 public record OrderResource(
     int Id,
     Guid PublicTrackingId,
@@ -36,4 +42,6 @@ public record OrderResource(
     string Status,
     FurnitureDetailsResource Details,
     QuoteResource? Quote,
-    IEnumerable<PaymentResource> Payments);
+    IEnumerable<PaymentResource> Payments,
+    int CompletedStages,
+    int TotalStages);
