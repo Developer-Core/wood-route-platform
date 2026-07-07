@@ -7,10 +7,9 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest.Resources;
 ///     Dimensions are expressed in centimeters and must be positive values.
 /// </remarks>
 /// <param name="CustomerId">
-///     The identifier of the customer placing the order.
-/// </param>
-/// <param name="CarpenterId">
-///     The identifier of the carpenter receiving the order.
+///     The identifier of the customer placing the order. Optional: it is only supplied when a
+///     carpenter places the order on behalf of an existing customer; for a client placing their own
+///     order the customer is derived from the authenticated identity.
 /// </param>
 /// <param name="FurnitureType">
 ///     The type of furniture requested.
@@ -31,8 +30,7 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest.Resources;
 ///     Additional design notes for the furniture piece.
 /// </param>
 public record CreateOrderResource(
-    int CustomerId,
-    int CarpenterId,
+    int? CustomerId,
     string FurnitureType,
     decimal Width,
     decimal Height,

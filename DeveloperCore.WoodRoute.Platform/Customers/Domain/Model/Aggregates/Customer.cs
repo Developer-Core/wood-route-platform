@@ -85,19 +85,21 @@ public class Customer : IAuditableEntity
     }
 
     /// <summary>
-    ///     Validates that the phone number is a non-empty value.
+    ///     Normalizes the phone number, treating null or empty as an absent value.
     /// </summary>
+    /// <remarks>
+    ///     A registered client may not have a phone number, while the frontend still requires it for
+    ///     walk-in customers created by a carpenter. The column stays NOT NULL, storing an empty
+    ///     string when no phone is provided, so no migration is required.
+    /// </remarks>
     /// <param name="phone">
-    ///     The phone number to validate.
+    ///     The phone number to normalize.
     /// </param>
     /// <returns>
-    ///     The validated phone number.
+    ///     The provided phone number, or an empty string when it is null.
     /// </returns>
-    /// <exception cref="ArgumentException">Thrown if <paramref name="phone" /> is null or empty.</exception>
     private static string ValidatePhone(string phone)
     {
-        if (string.IsNullOrWhiteSpace(phone))
-            throw new ArgumentException("The phone number is required.", nameof(phone));
-        return phone;
+        return phone ?? string.Empty;
     }
 }
