@@ -46,4 +46,11 @@ public class OrderQueryService(IOrderRepository orderRepository) : IOrderQuerySe
     {
         return await orderRepository.FindByCarpenterIdAsync(query.CarpenterId, cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<Order>> Handle(GetUnassignedOrdersQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        return await orderRepository.FindUnassignedAsync(cancellationToken);
+    }
 }

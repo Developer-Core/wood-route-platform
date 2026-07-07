@@ -3,6 +3,7 @@ using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.Aggregates;
 using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Attributes;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Extensions;
+using DeveloperCore.WoodRoute.Platform.Customers.Interfaces.Acl;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Aggregates;
@@ -34,6 +35,7 @@ namespace DeveloperCore.WoodRoute.Platform.Sales.Interfaces.Rest;
 public class OrdersController(
     IOrderCommandService orderCommandService,
     IOrderQueryService orderQueryService,
+    ICustomersContextFacade customersContextFacade,
     ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
@@ -43,7 +45,36 @@ public class OrdersController(
     [SwaggerResponse(400, "The order was not created.")]
     public async Task<IActionResult> CreateOrder(CreateOrderResource resource, CancellationToken cancellationToken)
     {
-        var createOrderCommand = CreateOrderCommandFromResourceAssembler.ToCommandFromResource(resource);
+        // The acting identity is derived from the JWT-backed token (never from client input). A
+        // carpenter places an order on behalf of an existing customer and stays assigned to it; a
+        // client places their own order, which is derived from (or created for) their account and
+        // goes to the pool unassigned.
+        var user = HttpContext.GetAuthenticatedUser();
+        if (user is null)
+            return Unauthorized();
+
+        int customerId;
+        int? carpenterId;
+        if (user.Role == EUserRole.Carpenter)
+        {
+            if (resource.CustomerId is null)
+                return Problem(
+                    detail: "A customer is required when a carpenter places an order.",
+                    statusCode: 400,
+                    title: "Sales.CustomerRequired");
+
+            customerId = resource.CustomerId.Value;
+            carpenterId = user.Id;
+        }
+        else
+        {
+            customerId = await customersContextFacade.FindOrCreateCustomerForUserAsync(
+                user.Id, user.FirstName, user.LastName, user.Email, cancellationToken);
+            carpenterId = null;
+        }
+
+        var createOrderCommand =
+            CreateOrderCommandFromResourceAssembler.ToCommandFromResource(resource, customerId, carpenterId);
         var result = await orderCommandService.Handle(createOrderCommand, cancellationToken);
 
         return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
@@ -67,10 +98,34 @@ public class OrdersController(
         if (user is null)
             return Unauthorized();
 
-        var orders = user.Role == EUserRole.Client
-            ? await orderQueryService.Handle(new GetOrdersByCustomerIdQuery(user.Id), cancellationToken)
-            : await orderQueryService.Handle(new GetOrdersByCarpenterIdQuery(user.Id), cancellationToken);
+        IEnumerable<Order> orders;
+        if (user.Role == EUserRole.Client)
+        {
+            var clientCustomerId = await customersContextFacade.FindCustomerIdByUserAsync(user.Id, cancellationToken);
+            if (clientCustomerId is null)
+                return Ok(Array.Empty<OrderResource>());
 
+            orders = await orderQueryService.Handle(new GetOrdersByCustomerIdQuery(clientCustomerId.Value),
+                cancellationToken);
+        }
+        else
+        {
+            orders = await orderQueryService.Handle(new GetOrdersByCarpenterIdQuery(user.Id), cancellationToken);
+        }
+
+        var orderResources = orders.Select(OrderResourceFromEntityAssembler.ToResourceFromEntity);
+        return Ok(orderResources);
+    }
+
+    [HttpGet("pool")]
+    [Authorize(EUserRole.Carpenter)]
+    [SwaggerOperation("Get Order Pool", "Get the unassigned, pending orders any carpenter can claim.",
+        OperationId = "GetOrderPool")]
+    [SwaggerResponse(200, "The pool orders were found and returned.", typeof(IEnumerable<OrderResource>))]
+    [SwaggerResponse(401, "The request is not authenticated.")]
+    public async Task<IActionResult> GetOrderPool(CancellationToken cancellationToken)
+    {
+        var orders = await orderQueryService.Handle(new GetUnassignedOrdersQuery(), cancellationToken);
         var orderResources = orders.Select(OrderResourceFromEntityAssembler.ToResourceFromEntity);
         return Ok(orderResources);
     }
@@ -90,7 +145,7 @@ public class OrdersController(
 
         // Security (IDOR): treat an order the user does not own exactly like a missing one, so the
         // response never leaks the existence of other users' orders.
-        if (order is null || !OwnsOrder(user, order))
+        if (order is null || !await OwnsOrderAsync(user, order, cancellationToken))
             return problemDetailsFactory.CreateFromError(this,
                 SalesActionResultAssembler.ToStatusCode(SalesErrors.OrderNotFound), SalesErrors.OrderNotFound);
         return Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(order));
@@ -98,13 +153,16 @@ public class OrdersController(
 
     /// <summary>
     ///     Returns whether the authenticated user owns the order, based on their role: a client owns
-    ///     the orders they placed, a carpenter owns the orders assigned to them.
+    ///     the orders placed for the customer linked to their account, a carpenter owns the orders
+    ///     assigned to them.
     /// </summary>
-    private static bool OwnsOrder(User user, Order order)
+    private async Task<bool> OwnsOrderAsync(User user, Order order, CancellationToken cancellationToken)
     {
-        return user.Role == EUserRole.Client
-            ? order.CustomerId == user.Id
-            : order.CarpenterId == user.Id;
+        if (user.Role == EUserRole.Carpenter)
+            return order.CarpenterId == user.Id;
+
+        var customerId = await customersContextFacade.FindCustomerIdByUserAsync(user.Id, cancellationToken);
+        return customerId is not null && order.CustomerId == customerId;
     }
 
     /// <summary>
@@ -120,7 +178,7 @@ public class OrdersController(
             return Unauthorized();
 
         var order = await orderQueryService.Handle(new GetOrderByIdQuery(orderId), cancellationToken);
-        if (order is null || !OwnsOrder(user, order))
+        if (order is null || !await OwnsOrderAsync(user, order, cancellationToken))
             return problemDetailsFactory.CreateFromError(this,
                 SalesActionResultAssembler.ToStatusCode(SalesErrors.OrderNotFound), SalesErrors.OrderNotFound);
         return null;
@@ -147,17 +205,22 @@ public class OrdersController(
     }
 
     [HttpPatch("{orderId:int}/accept")]
-    [SwaggerOperation("Accept Order", "Accept a pending order.", OperationId = "AcceptOrder")]
+    [Authorize(EUserRole.Carpenter)]
+    [SwaggerOperation("Accept Order", "Accept a pending order, claiming it from the pool when unassigned.",
+        OperationId = "AcceptOrder")]
     [SwaggerResponse(200, "The order was accepted.", typeof(OrderResource))]
     [SwaggerResponse(404, "The order was not found.")]
-    [SwaggerResponse(409, "The order is not pending.")]
+    [SwaggerResponse(409, "The order is not pending or is already assigned.")]
     public async Task<IActionResult> AcceptOrder(int orderId, CancellationToken cancellationToken)
     {
-        var accessDenied = await EnsureOrderOwnershipAsync(orderId, cancellationToken);
-        if (accessDenied is not null)
-            return accessDenied;
+        // A carpenter accepts an order to claim it from the pool: the acting identity is derived from
+        // the JWT-backed token (never from client input) and, when the order is still unassigned, the
+        // command assigns it to this carpenter before accepting it.
+        var user = HttpContext.GetAuthenticatedUser();
+        if (user is null)
+            return Unauthorized();
 
-        var result = await orderCommandService.Handle(new AcceptOrderCommand(orderId), cancellationToken);
+        var result = await orderCommandService.Handle(new AcceptOrderCommand(orderId, user.Id), cancellationToken);
 
         return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
             acceptedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(acceptedOrder)));
@@ -197,6 +260,63 @@ public class OrdersController(
             cancelledOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(cancelledOrder)));
     }
 
+    [HttpPatch("{orderId:int}/start")]
+    [Authorize(EUserRole.Carpenter)]
+    [SwaggerOperation("Start Production", "Start the production of an accepted order.",
+        OperationId = "StartProduction")]
+    [SwaggerResponse(200, "The order production was started.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not accepted.")]
+    public async Task<IActionResult> StartProduction(int orderId, CancellationToken cancellationToken)
+    {
+        var accessDenied = await EnsureOrderOwnershipAsync(orderId, cancellationToken);
+        if (accessDenied is not null)
+            return accessDenied;
+
+        var result = await orderCommandService.Handle(new StartProductionCommand(orderId), cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
+            startedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(startedOrder)));
+    }
+
+    [HttpPatch("{orderId:int}/ready")]
+    [Authorize(EUserRole.Carpenter)]
+    [SwaggerOperation("Mark Ready For Delivery", "Mark an in-progress order as ready for delivery.",
+        OperationId = "MarkOrderReady")]
+    [SwaggerResponse(200, "The order was marked ready for delivery.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not in progress.")]
+    public async Task<IActionResult> MarkOrderReady(int orderId, CancellationToken cancellationToken)
+    {
+        var accessDenied = await EnsureOrderOwnershipAsync(orderId, cancellationToken);
+        if (accessDenied is not null)
+            return accessDenied;
+
+        var result = await orderCommandService.Handle(new MarkOrderReadyCommand(orderId), cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
+            readyOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(readyOrder)));
+    }
+
+    [HttpPatch("{orderId:int}/complete")]
+    [Authorize(EUserRole.Carpenter)]
+    [SwaggerOperation("Complete Order", "Complete an order that is ready for delivery.",
+        OperationId = "CompleteOrder")]
+    [SwaggerResponse(200, "The order was completed.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not ready for delivery.")]
+    public async Task<IActionResult> CompleteOrder(int orderId, CancellationToken cancellationToken)
+    {
+        var accessDenied = await EnsureOrderOwnershipAsync(orderId, cancellationToken);
+        if (accessDenied is not null)
+            return accessDenied;
+
+        var result = await orderCommandService.Handle(new CompleteOrderCommand(orderId), cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
+            completedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(completedOrder)));
+    }
+
     [HttpPost("{orderId:int}/quote")]
     [Authorize(EUserRole.Carpenter)]
     [SwaggerOperation("Generate Quote", "Generate the quote for a pending order.", OperationId = "GenerateQuote")]
@@ -220,7 +340,7 @@ public class OrdersController(
     }
 
     [HttpPatch("{orderId:int}/quote/accept")]
-    [Authorize(EUserRole.Client)]
+    [Authorize(EUserRole.Client, EUserRole.Carpenter)]
     [SwaggerOperation("Accept Quote", "Accept the quote proposed for an order.", OperationId = "AcceptQuote")]
     [SwaggerResponse(200, "The quote was accepted.", typeof(OrderResource))]
     [SwaggerResponse(404, "The order was not found.")]
@@ -238,7 +358,7 @@ public class OrdersController(
     }
 
     [HttpPost("{orderId:int}/payments")]
-    [Authorize(EUserRole.Client)]
+    [Authorize(EUserRole.Client, EUserRole.Carpenter)]
     [SwaggerOperation("Register Payment", "Register a payment for an order, pending receipt validation.",
         OperationId = "RegisterPayment")]
     [SwaggerResponse(201, "The payment was registered.", typeof(OrderResource))]

@@ -14,6 +14,12 @@ public static class SalesErrors
     public static readonly Error OrderNotPending =
         new("Sales.OrderNotPending", "The operation is only allowed while the order is pending.");
 
+    public static readonly Error OrderAlreadyAssigned =
+        new("Sales.OrderAlreadyAssigned", "The order is already assigned to a carpenter.");
+
+    public static readonly Error OrderNotAccepted =
+        new("Sales.OrderNotAccepted", "The quote can only be generated once the order has been accepted.");
+
     public static readonly Error QuoteNotFound =
         new("Sales.QuoteNotFound", "The order does not have a quote yet.");
 

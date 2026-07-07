@@ -1,8 +1,8 @@
+using DeveloperCore.WoodRoute.Platform.Customers.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Engagement.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Inventory.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Manufacturing.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
-using DeveloperCore.WoodRoute.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Sales.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using DeveloperCore.WoodRoute.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
@@ -44,7 +44,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
         builder.ApplyInventoryConfiguration();
         builder.ApplyEngagementConfiguration();
         builder.ApplyManufacturingConfiguration();
-        builder.ApplyProfilesConfiguration();
+        builder.ApplyCustomersConfiguration();
         builder.ApplyIamConfiguration();
 
         // General Naming Convention for the database objects

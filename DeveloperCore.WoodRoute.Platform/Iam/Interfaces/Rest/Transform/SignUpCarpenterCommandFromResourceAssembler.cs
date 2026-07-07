@@ -20,6 +20,6 @@ public static class SignUpCarpenterCommandFromResourceAssembler
     /// </returns>
     public static SignUpCarpenterCommand ToCommandFromResource(SignUpCarpenterResource resource)
     {
-        return new SignUpCarpenterCommand(resource.Email, resource.Password, resource.InvitationCode);
+        return new SignUpCarpenterCommand(resource.FirstName, resource.LastName, resource.Email, resource.Password, resource.InvitationCode);
     }
 }

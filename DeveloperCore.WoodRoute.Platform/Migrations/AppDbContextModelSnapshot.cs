@@ -22,6 +22,39 @@ namespace DeveloperCore.WoodRoute.Platform.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Customers.Domain.Model.Aggregates.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("phone");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("p_k_customers");
+
+                    b.ToTable("customers");
+                });
+
             modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Aggregates.Conversation", b =>
                 {
                     b.Property<int>("Id")
@@ -142,6 +175,18 @@ namespace DeveloperCore.WoodRoute.Platform.Migrations
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)")
                         .HasColumnName("email");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("first_name");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_name");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -310,29 +355,6 @@ namespace DeveloperCore.WoodRoute.Platform.Migrations
                     b.ToTable("stages", (string)null);
                 });
 
-            modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Profiles.Domain.Model.Aggregates.Profile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id")
-                        .HasName("p_k_profiles");
-
-                    b.ToTable("profiles");
-                });
-
             modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Aggregates.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -342,7 +364,7 @@ namespace DeveloperCore.WoodRoute.Platform.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CarpenterId")
+                    b.Property<int?>("CarpenterId")
                         .HasColumnType("integer")
                         .HasColumnName("carpenter_id");
 
@@ -482,29 +504,9 @@ namespace DeveloperCore.WoodRoute.Platform.Migrations
                     b.ToTable("quotes");
                 });
 
-            modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Entities.Message", b =>
+            modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Customers.Domain.Model.Aggregates.Customer", b =>
                 {
-                    b.HasOne("DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Aggregates.Conversation", null)
-                        .WithMany("Messages")
-                        .HasForeignKey("ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("f_k_messages_conversations_conversation_id");
-                });
-
-            modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Entities.Stage", b =>
-                {
-                    b.HasOne("DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Aggregates.ManufactureOrder", null)
-                        .WithMany("Stages")
-                        .HasForeignKey("ManufactureOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("f_k_stages_manufacture_orders_manufacture_order_id");
-                });
-
-            modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Profiles.Domain.Model.Aggregates.Profile", b =>
-                {
-                    b.OwnsOne("DeveloperCore.WoodRoute.Platform.Profiles.Domain.Model.ValueObjects.EmailAddress", "Email", b1 =>
+                    b.OwnsOne("DeveloperCore.WoodRoute.Platform.Customers.Domain.Model.ValueObjects.EmailAddress", "Email", b1 =>
                         {
                             b1.Property<int>("Id")
                                 .HasColumnType("integer")
@@ -517,20 +519,20 @@ namespace DeveloperCore.WoodRoute.Platform.Migrations
                                 .HasColumnName("email_address");
 
                             b1.HasKey("Id")
-                                .HasName("p_k_profiles");
+                                .HasName("p_k_customers");
 
                             b1.HasIndex("Address")
                                 .IsUnique()
-                                .HasDatabaseName("i_x_profiles_email_address");
+                                .HasDatabaseName("i_x_customers_email_address");
 
-                            b1.ToTable("profiles");
+                            b1.ToTable("customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("Id")
-                                .HasConstraintName("f_k_profiles_profiles_id");
+                                .HasConstraintName("f_k_customers_customers_id");
                         });
 
-                    b.OwnsOne("DeveloperCore.WoodRoute.Platform.Profiles.Domain.Model.ValueObjects.PersonName", "Name", b1 =>
+                    b.OwnsOne("DeveloperCore.WoodRoute.Platform.Customers.Domain.Model.ValueObjects.PersonName", "Name", b1 =>
                         {
                             b1.Property<int>("Id")
                                 .HasColumnType("integer")
@@ -549,13 +551,13 @@ namespace DeveloperCore.WoodRoute.Platform.Migrations
                                 .HasColumnName("last_name");
 
                             b1.HasKey("Id")
-                                .HasName("p_k_profiles");
+                                .HasName("p_k_customers");
 
-                            b1.ToTable("profiles");
+                            b1.ToTable("customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("Id")
-                                .HasConstraintName("f_k_profiles_profiles_id");
+                                .HasConstraintName("f_k_customers_customers_id");
                         });
 
                     b.Navigation("Email")
@@ -563,6 +565,26 @@ namespace DeveloperCore.WoodRoute.Platform.Migrations
 
                     b.Navigation("Name")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Entities.Message", b =>
+                {
+                    b.HasOne("DeveloperCore.WoodRoute.Platform.Engagement.Domain.Model.Aggregates.Conversation", null)
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("f_k_messages_conversations_conversation_id");
+                });
+
+            modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Entities.Stage", b =>
+                {
+                    b.HasOne("DeveloperCore.WoodRoute.Platform.Manufacturing.Domain.Model.Aggregates.ManufactureOrder", null)
+                        .WithMany("Stages")
+                        .HasForeignKey("ManufactureOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("f_k_stages_manufacture_orders_manufacture_order_id");
                 });
 
             modelBuilder.Entity("DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Aggregates.Order", b =>
