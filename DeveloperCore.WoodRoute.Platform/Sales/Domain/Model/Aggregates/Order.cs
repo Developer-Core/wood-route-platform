@@ -158,14 +158,15 @@ public class Order : AggregateRoot, IAuditableEntity
     }
 
     /// <summary>
-    ///     Generates the quote for the order. Only pending orders without a quote can be quoted.
+    ///     Generates the quote for the order. Only accepted orders without a quote can be quoted:
+    ///     the carpenter first accepts (claims) the order, then proposes its quote.
     /// </summary>
     /// <param name="command">
     ///     The <see cref="GenerateQuoteCommand" /> with the quote data.
     /// </param>
     public Error GenerateQuote(GenerateQuoteCommand command)
     {
-        if (Status is not EOrderStatus.Pending) return SalesErrors.OrderNotPending;
+        if (Status is not EOrderStatus.Accepted) return SalesErrors.OrderNotAccepted;
         if (Quote is not null) return SalesErrors.QuoteAlreadyExists;
         if (command.MaterialsCost < 0 || command.LaborCost < 0 ||
             command.MaterialsCost + command.LaborCost <= 0)
