@@ -44,7 +44,18 @@ public class OrderCommandService(IOrderRepository orderRepository, IUnitOfWork u
     /// <inheritdoc />
     public Task<Result<Order>> Handle(AcceptOrderCommand command, CancellationToken cancellationToken = default)
     {
-        return ApplyToOrderAsync(command.OrderId, order => order.Accept(), cancellationToken);
+        return ApplyToOrderAsync(command.OrderId, order =>
+        {
+            // Pool orders are born unassigned: claim the order for the accepting carpenter first,
+            // then accept it. Already-assigned orders are simply accepted.
+            if (order.CarpenterId is null)
+            {
+                var assignError = order.AssignCarpenter(command.CarpenterId);
+                if (assignError != Error.None) return assignError;
+            }
+
+            return order.Accept();
+        }, cancellationToken);
     }
 
     /// <inheritdoc />

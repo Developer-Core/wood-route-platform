@@ -67,4 +67,16 @@ public interface IOrderQueryService
     ///     The <see cref="Order" /> instances received by the carpenter.
     /// </returns>
     Task<IEnumerable<Order>> Handle(GetOrdersByCarpenterIdQuery query, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Handles the get unassigned orders query.
+    /// </summary>
+    /// <param name="query">
+    ///     The <see cref="GetUnassignedOrdersQuery" /> query
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>
+    ///     The unassigned, pending <see cref="Order" /> instances that make up the pool.
+    /// </returns>
+    Task<IEnumerable<Order>> Handle(GetUnassignedOrdersQuery query, CancellationToken cancellationToken = default);
 }

@@ -49,7 +49,7 @@ public class Order : AggregateRoot, IAuditableEntity
 
     public int Id { get; }
     public int CustomerId { get; private set; }
-    public int CarpenterId { get; private set; }
+    public int? CarpenterId { get; private set; }
     public FurnitureDetails Details { get; private set; }
     public EOrderStatus Status { get; private set; }
 
@@ -63,6 +63,19 @@ public class Order : AggregateRoot, IAuditableEntity
 
     public DateTimeOffset? CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
+
+    /// <summary>
+    ///     Assigns a carpenter to a currently unassigned order (an order taken from the pool).
+    /// </summary>
+    /// <param name="carpenterId">
+    ///     The identifier of the carpenter claiming the order.
+    /// </param>
+    public Error AssignCarpenter(int carpenterId)
+    {
+        if (CarpenterId is not null) return SalesErrors.OrderAlreadyAssigned;
+        CarpenterId = carpenterId;
+        return Error.None;
+    }
 
     /// <summary>
     ///     Accepts the order. Only pending orders can be accepted.
