@@ -260,6 +260,63 @@ public class OrdersController(
             cancelledOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(cancelledOrder)));
     }
 
+    [HttpPatch("{orderId:int}/start")]
+    [Authorize(EUserRole.Carpenter)]
+    [SwaggerOperation("Start Production", "Start the production of an accepted order.",
+        OperationId = "StartProduction")]
+    [SwaggerResponse(200, "The order production was started.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not accepted.")]
+    public async Task<IActionResult> StartProduction(int orderId, CancellationToken cancellationToken)
+    {
+        var accessDenied = await EnsureOrderOwnershipAsync(orderId, cancellationToken);
+        if (accessDenied is not null)
+            return accessDenied;
+
+        var result = await orderCommandService.Handle(new StartProductionCommand(orderId), cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
+            startedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(startedOrder)));
+    }
+
+    [HttpPatch("{orderId:int}/ready")]
+    [Authorize(EUserRole.Carpenter)]
+    [SwaggerOperation("Mark Ready For Delivery", "Mark an in-progress order as ready for delivery.",
+        OperationId = "MarkOrderReady")]
+    [SwaggerResponse(200, "The order was marked ready for delivery.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not in progress.")]
+    public async Task<IActionResult> MarkOrderReady(int orderId, CancellationToken cancellationToken)
+    {
+        var accessDenied = await EnsureOrderOwnershipAsync(orderId, cancellationToken);
+        if (accessDenied is not null)
+            return accessDenied;
+
+        var result = await orderCommandService.Handle(new MarkOrderReadyCommand(orderId), cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
+            readyOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(readyOrder)));
+    }
+
+    [HttpPatch("{orderId:int}/complete")]
+    [Authorize(EUserRole.Carpenter)]
+    [SwaggerOperation("Complete Order", "Complete an order that is ready for delivery.",
+        OperationId = "CompleteOrder")]
+    [SwaggerResponse(200, "The order was completed.", typeof(OrderResource))]
+    [SwaggerResponse(404, "The order was not found.")]
+    [SwaggerResponse(409, "The order is not ready for delivery.")]
+    public async Task<IActionResult> CompleteOrder(int orderId, CancellationToken cancellationToken)
+    {
+        var accessDenied = await EnsureOrderOwnershipAsync(orderId, cancellationToken);
+        if (accessDenied is not null)
+            return accessDenied;
+
+        var result = await orderCommandService.Handle(new CompleteOrderCommand(orderId), cancellationToken);
+
+        return SalesActionResultAssembler.ToActionResultFromResult(this, problemDetailsFactory, result,
+            completedOrder => Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(completedOrder)));
+    }
+
     [HttpPost("{orderId:int}/quote")]
     [Authorize(EUserRole.Carpenter)]
     [SwaggerOperation("Generate Quote", "Generate the quote for a pending order.", OperationId = "GenerateQuote")]
