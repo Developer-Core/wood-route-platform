@@ -17,22 +17,6 @@ public interface ISalesContextFacade
     Task<bool> IsOrderAcceptedAsync(int orderId);
 
     /// <summary>
-    ///     Returns whether the given user takes part in the order, i.e. is either its customer or
-    ///     its carpenter. Used by other bounded contexts to enforce object-level authorization
-    ///     without duplicating the Sales order aggregate.
-    /// </summary>
-    /// <param name="orderId">
-    ///     The identifier of the order to check.
-    /// </param>
-    /// <param name="userId">
-    ///     The identifier of the authenticated user.
-    /// </param>
-    /// <returns>
-    ///     True if the order exists and the user is its customer or carpenter, otherwise false.
-    /// </returns>
-    Task<bool> IsOrderParticipantAsync(int orderId, int userId);
-
-    /// <summary>
     ///     Resolves the database identifier of the order that owns the given public tracking id.
     /// </summary>
     /// <param name="publicTrackingId">

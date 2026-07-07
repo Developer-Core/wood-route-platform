@@ -76,7 +76,8 @@ public class UserCommandService(
             return Result<(User user, string token)>.Failure(IamErrors.InvalidInvitationCode);
 
         // The role is fixed to Carpenter server-side; the request cannot influence it.
-        var signUpCommand = new SignUpCommand(command.Email, command.Password, EUserRole.Carpenter);
+        var signUpCommand = new SignUpCommand(command.FirstName, command.LastName, command.Email, command.Password,
+            EUserRole.Carpenter);
         return await Handle(signUpCommand, cancellationToken);
     }
 }

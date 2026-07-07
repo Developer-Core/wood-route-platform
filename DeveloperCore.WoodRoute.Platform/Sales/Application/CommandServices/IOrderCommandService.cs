@@ -70,6 +70,42 @@ public interface IOrderCommandService
     Task<Result<Order>> Handle(RejectOrderCommand command, CancellationToken cancellationToken = default);
 
     /// <summary>
+    ///     Handles the start production command.
+    /// </summary>
+    /// <param name="command">
+    ///     The <see cref="StartProductionCommand" /> command
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>
+    ///     A <see cref="Result{Order}" /> with the order whose production started.
+    /// </returns>
+    Task<Result<Order>> Handle(StartProductionCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Handles the mark order ready command.
+    /// </summary>
+    /// <param name="command">
+    ///     The <see cref="MarkOrderReadyCommand" /> command
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>
+    ///     A <see cref="Result{Order}" /> with the order marked ready for delivery.
+    /// </returns>
+    Task<Result<Order>> Handle(MarkOrderReadyCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Handles the complete order command.
+    /// </summary>
+    /// <param name="command">
+    ///     The <see cref="CompleteOrderCommand" /> command
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>
+    ///     A <see cref="Result{Order}" /> with the completed order.
+    /// </returns>
+    Task<Result<Order>> Handle(CompleteOrderCommand command, CancellationToken cancellationToken = default);
+
+    /// <summary>
     ///     Handles the generate quote command.
     /// </summary>
     /// <param name="command">
