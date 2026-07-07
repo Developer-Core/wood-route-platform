@@ -4,6 +4,7 @@ using DeveloperCore.WoodRoute.Platform.Iam.Domain.Model.ValueObjects;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Attributes;
 using DeveloperCore.WoodRoute.Platform.Iam.Infrastructure.Pipeline.Middleware.Extensions;
 using DeveloperCore.WoodRoute.Platform.Customers.Interfaces.Acl;
+using DeveloperCore.WoodRoute.Platform.Manufacturing.Interfaces.Acl;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.CommandServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Application.QueryServices;
 using DeveloperCore.WoodRoute.Platform.Sales.Domain.Model.Aggregates;
@@ -36,6 +37,7 @@ public class OrdersController(
     IOrderCommandService orderCommandService,
     IOrderQueryService orderQueryService,
     ICustomersContextFacade customersContextFacade,
+    IManufacturingContextFacade manufacturingContextFacade,
     ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
@@ -113,7 +115,13 @@ public class OrdersController(
             orders = await orderQueryService.Handle(new GetOrdersByCarpenterIdQuery(user.Id), cancellationToken);
         }
 
-        var orderResources = orders.Select(OrderResourceFromEntityAssembler.ToResourceFromEntity);
+        // Fetch the production progress for every order in a single ACL call to avoid an N+1 query.
+        var orderList = orders.ToList();
+        var progressByOrderId = await manufacturingContextFacade.GetStageProgressForOrdersAsync(
+            orderList.Select(o => o.Id), cancellationToken);
+
+        var orderResources = orderList.Select(o => OrderResourceFromEntityAssembler.ToResourceFromEntity(
+            o, progressByOrderId.TryGetValue(o.Id, out var progress) ? progress : default));
         return Ok(orderResources);
     }
 
@@ -126,7 +134,7 @@ public class OrdersController(
     public async Task<IActionResult> GetOrderPool(CancellationToken cancellationToken)
     {
         var orders = await orderQueryService.Handle(new GetUnassignedOrdersQuery(), cancellationToken);
-        var orderResources = orders.Select(OrderResourceFromEntityAssembler.ToResourceFromEntity);
+        var orderResources = orders.Select(o => OrderResourceFromEntityAssembler.ToResourceFromEntity(o));
         return Ok(orderResources);
     }
 
@@ -148,7 +156,9 @@ public class OrdersController(
         if (order is null || !await OwnsOrderAsync(user, order, cancellationToken))
             return problemDetailsFactory.CreateFromError(this,
                 SalesActionResultAssembler.ToStatusCode(SalesErrors.OrderNotFound), SalesErrors.OrderNotFound);
-        return Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(order));
+
+        var progress = await manufacturingContextFacade.GetStageProgressAsync(orderId, cancellationToken);
+        return Ok(OrderResourceFromEntityAssembler.ToResourceFromEntity(order, progress));
     }
 
     /// <summary>

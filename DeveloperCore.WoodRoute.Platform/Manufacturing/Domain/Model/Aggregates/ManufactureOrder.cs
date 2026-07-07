@@ -71,6 +71,32 @@ public class ManufactureOrder : AggregateRoot, IAuditableEntity
     }
 
     /// <summary>
+    ///     Re-defines the production plan while none of the stages have started yet. The whole plan is
+    ///     replaced: the previous stages are cleared and the new ones re-created from scratch.
+    /// </summary>
+    public Error RedefineStages(IEnumerable<(string Name, int EstimatedTimeInDays)> stageDefinitions)
+    {
+        // Editing is only allowed while the plan is untouched: every stage must still be Pending.
+        if (_stages.Any(s => s.Status != EStageStatus.Pending))
+            return ManufacturingErrors.StagesAlreadyStarted;
+
+        var definitions = stageDefinitions.ToList();
+        if (definitions.Count == 0) return ManufacturingErrors.EmptyStageList;
+
+        _stages.Clear();
+
+        var index = 0;
+        foreach (var (name, days) in definitions)
+        {
+            _stages.Add(new Stage(Id, name, days, index));
+            index++;
+        }
+
+        StagesAreDefined = true;
+        return Error.None;
+    }
+
+    /// <summary>
     ///     Updates the status of a specific stage and raises <see cref="StageUpdatedEvent" />.
     /// </summary>
     public Error UpdateStageStatus(int stageId, EStageStatus newStatus, int updatedByUserId)

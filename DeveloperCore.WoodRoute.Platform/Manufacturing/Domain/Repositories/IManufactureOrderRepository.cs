@@ -14,4 +14,11 @@ public interface IManufactureOrderRepository : IBaseRepository<ManufactureOrder>
     /// </summary>
     Task<ManufactureOrder?> FindBySalesOrderIdAsync(int salesOrderId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Finds the manufacture orders linked to the given sales order ids in a single query.
+    ///     Includes all stages so callers can compute progress without extra round-trips.
+    /// </summary>
+    Task<IReadOnlyList<ManufactureOrder>> FindBySalesOrderIdsAsync(IEnumerable<int> salesOrderIds,
+        CancellationToken cancellationToken = default);
 }

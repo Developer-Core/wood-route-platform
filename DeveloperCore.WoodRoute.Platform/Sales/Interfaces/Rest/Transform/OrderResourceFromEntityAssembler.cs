@@ -17,7 +17,7 @@ public static class OrderResourceFromEntityAssembler
     /// <returns>
     ///     A new <see cref="OrderResource" /> instance.
     /// </returns>
-    public static OrderResource ToResourceFromEntity(Order entity)
+    public static OrderResource ToResourceFromEntity(Order entity, (int Completed, int Total) progress = default)
     {
         return new OrderResource(
             entity.Id,
@@ -33,6 +33,8 @@ public static class OrderResourceFromEntityAssembler
                 entity.Details.Material,
                 entity.Details.DesignNotes),
             entity.Quote is not null ? QuoteResourceFromEntityAssembler.ToResourceFromEntity(entity.Quote) : null,
-            entity.Payments.Select(PaymentResourceFromEntityAssembler.ToResourceFromEntity));
+            entity.Payments.Select(PaymentResourceFromEntityAssembler.ToResourceFromEntity),
+            progress.Completed,
+            progress.Total);
     }
 }

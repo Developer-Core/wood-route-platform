@@ -20,4 +20,17 @@ public class ManufactureOrderRepository(AppDbContext context)
             .Include(mo => mo.Stages)
             .FirstOrDefaultAsync(mo => mo.SalesOrderId == salesOrderId, cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ManufactureOrder>> FindBySalesOrderIdsAsync(IEnumerable<int> salesOrderIds,
+        CancellationToken cancellationToken = default)
+    {
+        var ids = salesOrderIds.Distinct().ToList();
+        if (ids.Count == 0) return [];
+
+        return await Context.Set<ManufactureOrder>()
+            .Include(mo => mo.Stages)
+            .Where(mo => ids.Contains(mo.SalesOrderId))
+            .ToListAsync(cancellationToken);
+    }
 }
